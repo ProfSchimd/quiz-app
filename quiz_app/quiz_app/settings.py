@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-9rc*qf^fivu)7)7(pxd9yuc_7(x7%7^eox+_86+r8v#z%ym2_0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -51,10 +51,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'quiz_app.urls'
 
+LOGIN_REDIRECT_URL ='/'
+LOGOUT_REDIRECT_URL ='/'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
