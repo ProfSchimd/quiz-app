@@ -52,7 +52,7 @@ def quiz(request):
                 key = [0]*len(q["options"])
                 for i in selected:
                     key[i] = 1
-                answer[q["id"]] = q["corect"]
+                answer[q["id"]] = q["correct"]
                 print(q["id"])
                 print("Correct:", key)
                 print("Answer: ", q["correct"])
