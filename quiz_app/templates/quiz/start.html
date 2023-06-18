@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Start</title>
+</head>
+<body>
+    <h1>Ready to start?</h1>
+    <p>
+        <strong>Assignment: </strong>{{ assignment.description }}
+        <form method="post" action ="{% url 'quiz' %}">
+            {% csrf_token %}
+            <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+            <input type="submit" value="start" />
+        </form>
+    </p>
+    {% if attempts %}
+        <p>
+            These are your previous attempts
+            <ul>
+                {% for attempt in attempts %}
+                    <li>{{ attempt.start }} </li>
+                {% endfor %}
+            </ul>
+        </p>
+    {% endif %}
+</body>
+</html>
