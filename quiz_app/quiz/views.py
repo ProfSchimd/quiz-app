@@ -40,23 +40,19 @@ def quiz(request):
     # Processing answers
     answers = {}
     if request.method == "POST":
-        print(request.POST)
+        # print("\n".join([f"{k}: {v}, {request.POST.getlist(k)}" for k, v in request.POST.items()]))
         answer = {}
         for q in questions.JSON:
             if q["type"] == "single" or q["type"] == "multiple":
-                selected = [
-                    int(x.split("_")[-1])-1 
-                    for x in request.POST 
-                    if x.startswith(q["id"])
-                ]
+                # List of selected options.
+                # Checkboxes and radios have name on the form 001_3
+                # indicating ID and position. This code splits the
+                # two and yields the second part when id = q["id"]
+                selected = [int(x)-1 for x in request.POST.getlist(q["id"])]
                 key = [0]*len(q["options"])
                 for i in selected:
                     key[i] = 1
-                answer[q["id"]] = q["correct"]
-                print(q["id"])
-                print("Correct:", key)
-                print("Answer: ", q["correct"])
-                print()
+                answer[q["id"]] = key
                 
     context = {
         "questions": []

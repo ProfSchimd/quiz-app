@@ -1,33 +1,27 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
+{% block content %}
+<h1>Quiz Questions</h1>
 
-<head>
-    <title>Quiz App - Questions</title>
-</head>
+<form method="post" action="{% url 'quiz' %}">
+    {% csrf_token %}
 
-<body>
-    <h1>Quiz Questions</h1>
+    {% for question in questions %}
+    <h2>{{ question.text|safe }}</h2>
+    {% if question.type == 'single' %}
+    {% for option in question.options %}
+    <input type="radio" id="{{ question.id }}_{{ forloop.counter }}" name="{{ question.id }}"
+        value="{{ forloop.counter }}">
+    <label for="{{ question.id }}_{{ forloop.counter }}">{{ option|safe }}</label><br>
+    {% endfor %}
+    {% elif question.type == 'multiple' %}
+    {% for option in question.options %}
+    <input type="checkbox" id="{{ question.id }}_{{ forloop.counter }}" name="{{ question.id }}"
+        value="{{ forloop.counter }}">
+    <label for="{{ question.id }}_{{ forloop.counter }}}">{{ option|safe }}</label><br>
+    {% endfor %}
+    {% endif %}
+    {% endfor %}
 
-    <form method="post" action="{% url 'quiz' %}">
-        {% csrf_token %}
-
-        {% for question in questions %}
-            <h2>{{ question.text|safe }}</h2>
-            {% if question.type == 'single' %}
-                {% for option in question.options %}
-                    <input type="radio" id="{{ question.id }}_{{ forloop.counter }}" name="{{ question.id }}_{{ forloop.counter }}" value="{{ forloop.counter }}">
-                    <label for="{{ question.id }}_{{ forloop.counter }}">{{ option|safe }}</label><br>
-                {% endfor %}
-            {% elif question.type == 'multiple' %}
-                {% for option in question.options %}
-                    <input type="checkbox" id="{{ question.id }}_{{ forloop.counter }}" name="{{ question.id }}_{{ forloop.counter }}" value="{{ forloop.counter }}">
-                    <label for="{{ question.id }}_{{ forloop.counter }}}">{{ option|safe }}</label><br>
-                {% endfor %}
-            {% endif %} 
-        {% endfor %}
-
-        <input type="submit" value="Submit">
-    </form>
-</body>
-
-</html>
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

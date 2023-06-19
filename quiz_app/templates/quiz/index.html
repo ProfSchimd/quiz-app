@@ -1,33 +1,25 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
+{% block content %}
+<h1>Welcome to the Quiz App!</h1>
+{% if user.is_authenticated %}
+<p>Hi {{ user.username }}!</p>
+{% if assignments %}
+<form method="post" action="{% url 'start' %}">
+    {% csrf_token %}
+    <select id="assignSelector" name="assignSelect">
+        {% for assignment in assignments %}
+        <option value="{{assignment.id}}">{{ assignment.description }} ({{ assignment.id }})</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Submit">
+</form>
+{% else %}
 
-<head>
-    <title>Quiz App - Home</title>
-</head>
-
-<body>
-    <h1>Welcome to the Quiz App!</h1>
-    {% if user.is_authenticated %}
-        <p>Hi {{ user.username }}!</p>
-        {% if assignments %}
-        <form method="post" action="{% url 'start' %}">
-            {% csrf_token %}
-            <select id="assignSelector" name="assignSelect">
-                {% for assignment in assignments %}
-                    <option value="{{assignment.id}}">{{ assignment.description }} ({{ assignment.id }})</option>
-                {% endfor %}
-            </select>
-            <input type="submit" value="Submit">
-        </form>
-        {% else %}
-            
-            <p>No available assignment, Sorry!</p>
-        {% endif %}
-        <a href="{% url 'logout' %}">Log Out</a>
-    {% else %}
-        <p>You are not logged in</p>
-        <a href="{% url 'login' %}">Log In</a>
-    {% endif %}
-</body>
-
-</html>
+<p>No available assignment, Sorry!</p>
+{% endif %}
+<a href="{% url 'logout' %}">Log Out</a>
+{% else %}
+<p>You are not logged in</p>
+<a href="{% url 'login' %}">Log In</a>
+{% endif %}
+{% endblock %}
