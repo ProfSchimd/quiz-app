@@ -1,19 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error</title>
-</head>
-<body>
-    <h1>
-        Something went wrong!
-    </h1>
-    {% if message %}
-        <p>{{ message }}</p>
-    {% endif %}
-    <p>
-        <a href="{% url 'index' %}">Back to the Home Page</a>
-    </p>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<h1>
+    Something went wrong!
+</h1>
+{% if message %}
+<p>{{ message }}</p>
+{% endif %}
+<p>
+    <a href="{% url 'index' %}">Back to the Home Page</a>
+</p>
+{% endblock %}
