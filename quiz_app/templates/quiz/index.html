@@ -3,6 +3,7 @@
 <h1>Welcome to the Quiz App!</h1>
 {% if user.is_authenticated %}
 <p>Hi {{ user.username }}!</p>
+
 {% if assignments %}
 <form method="post" action="{% url 'start' %}">
     {% csrf_token %}
@@ -14,12 +15,9 @@
     <input type="submit" value="Submit">
 </form>
 {% else %}
-
 <p>No available assignment, Sorry!</p>
 {% endif %}
-<a href="{% url 'logout' %}">Log Out</a>
 {% else %}
 <p>You are not logged in</p>
-<a href="{% url 'login' %}">Log In</a>
 {% endif %}
 {% endblock %}
