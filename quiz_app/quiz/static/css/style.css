@@ -1,0 +1,14 @@
+[data-theme="light"],
+:root:not([data-theme="dark"]) {
+    --danger: #9D0806;
+}
+
+@media only screen and (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+        --danger: #F9514E;
+    }
+  }
+
+.danger {
+    color: var(--danger);
+}

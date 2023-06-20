@@ -1,22 +1,26 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Ready to start?</h1>
-<p>
-    <strong>Assignment: </strong>{{ assignment.description }}
-<form method="post" action="{% url 'quiz' %}">
-    {% csrf_token %}
-    <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
-    <input type="submit" value="start" />
-</form>
-</p>
+<article>
+    <p><strong>Assignment: </strong>{{ assignment.description }}</p>
+    <footer><a role="button" href="{% url 'quiz' 0 %}">Attempt</a></footer>
+</article>
 {% if attempts %}
-<p>
-    These are your previous attempts
-<ul>
-    {% for attempt in attempts %}
-    <li>{{ attempt.start }} </li>
-    {% endfor %}
-</ul>
-</p>
+<article>
+    <header>
+        <h3>Previous attempts</h3>
+    </header>
+    <ul>
+        {% for attempt in attempts %}
+        <li>{{ attempt.start }}
+            {% if attempt.active %}
+            <a href="{% url 'quiz' attempt.id %}">Resume</a>
+            {% endif %}
+            <a>Submit</a>
+            <a class="danger">Delete</a>
+        </li>
+        {% endfor %}
+    </ul>
+</article>
 {% endif %}
 {% endblock %}

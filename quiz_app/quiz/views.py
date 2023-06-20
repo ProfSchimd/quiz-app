@@ -1,4 +1,8 @@
-from django.shortcuts import render
+from datetime import datetime
+
+from django.shortcuts import render, redirect
+from django.urls import reverse
+
 from .models import Assignment
 
 from quiz.models import Attempt, Quiz
@@ -27,14 +31,43 @@ def start(request):
     
     # Retrieve user attempts
     attempts = Attempt.objects.filter(user=current_user, assignment=assignment)
-    
+    print(attempts)
     context = {
         "assignment": assignment,
         "attempts": attempts
     }
     return render(request, "quiz/start.html", context=context)
 
-def quiz(request):
+def create(request, assignment_id):
+    quiz = Quiz.objects.all().first()
+    assignment = Assignment.objects.all().filter(id=assignment_id).first()
+    if not assignment:
+        return render(request, "quiz/error.html", context={
+            "message": "Assignment creation error"
+        })
+    attempt = Attempt(
+        user = request.user,
+        assignment=assignment,
+        quiz=quiz,
+        start=datetime.now()
+    )
+    attempt.save()
+    print(attempt)
+    url = reverse('quiz', kwargs={'attempt_id': attempt.id})
+    return redirect(url)
+
+def quiz(request, attempt_id=0):
+    print("ATT#: ", attempt_id)
+    # create new attempt
+    if attempt_id == 0:
+        print("TODO Create new attempt for", request.user)
+    attempt = Attempt.objects.all().filter(id=attempt_id).first()
+    if (attempt is None) or (attempt.user != request.user):
+        print(attempt)
+        print(request.user)
+        return render(request, "quiz/error.html", context={
+            "message": "Invalid assignment"
+        })
     # Get the questions
     questions = Quiz.objects.first()
     # Processing answers
@@ -55,6 +88,7 @@ def quiz(request):
                 answer[q["id"]] = key
                 
     context = {
+        "attempt": attempt_id,
         "questions": []
         
     }

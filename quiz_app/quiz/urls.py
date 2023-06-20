@@ -6,5 +6,6 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("start/", login_required(views.start), name="start"),
-    path("quiz/", login_required(views.quiz), name="quiz")
+    path("<int:assignment_id>/create/", login_required(views.create), name="create"),
+    path("<int:attempt_id>/quiz/", login_required(views.quiz), name="quiz")
 ]

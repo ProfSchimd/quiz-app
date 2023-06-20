@@ -2,7 +2,7 @@
 {% block content %}
 <h1>Quiz Questions</h1>
 
-<form method="post" action="{% url 'quiz' %}">
+<form method="post" action="{% url 'quiz' attempt %}">
     {% csrf_token %}
 
     {% for question in questions %}
