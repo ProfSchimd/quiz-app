@@ -5,19 +5,28 @@
 <p>Hi {{ user.username }}!</p>
 
 {% if assignments %}
-<form method="post" action="{% url 'start' %}">
-    {% csrf_token %}
-    <select id="assignSelector" name="assignSelect">
-        {% for assignment in assignments %}
-        <option value="{{assignment.id}}">{{ assignment.description }} ({{ assignment.id }})</option>
-        {% endfor %}
-    </select>
-    <input type="submit" value="Submit">
-</form>
+<select id="assignSelector" name="assignSelect" onchange="redirectToSelectedOption()">
+    {% for assignment in assignments %}
+    <option value="{% url 'start' assignment.id %}">{{ assignment.description }} ({{ assignment.id }})</option>
+    {% endfor %}
+</select>
 {% else %}
 <p>No available assignment, Sorry!</p>
 {% endif %}
 {% else %}
 <p>You are not logged in</p>
 {% endif %}
+
+
+<script>
+    function redirectToSelectedOption() {
+        var selectElement = document.getElementById("assignSelector");
+        var selectedOption = selectElement.options[selectElement.selectedIndex];
+        var selectedValue = selectedOption.value;
+
+        if (selectedValue) {
+            window.location.href = selectedValue;
+        }
+    }
+</script>
 {% endblock %}

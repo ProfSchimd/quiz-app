@@ -1,11 +1,10 @@
 from datetime import datetime
 
-from django.shortcuts import render, redirect
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
-from .models import Assignment
-
-from quiz.models import Attempt, Quiz
+from quiz.models import Attempt, Assignment, Quiz
 
 def index(request):
     context = {
@@ -16,22 +15,10 @@ def index(request):
         context["assignments"] = Assignment.objects.all().filter(active=True)
     return render(request, "quiz/index.html", context=context)
 
-def start(request):
-    if not request.method == "POST" or not request.POST["assignSelect"]:
-        return render(request, "quiz/error.html", context={
-            "message": "It looks like you haven't submitted to an assignment"
-        })
-    
-    current_user = request.user
-    # TODO: Solve not-logged or unauthorized users
-        
-    # retrieve the assignment
-    assignment_id = int(request.POST["assignSelect"])
-    assignment = Assignment.objects.get(id=assignment_id)
-    
+def start(request, assignment_id):
+    assignment = get_object_or_404(Assignment, pk=assignment_id)
     # Retrieve user attempts
-    attempts = Attempt.objects.filter(user=current_user, assignment=assignment)
-    print(attempts)
+    attempts = Attempt.objects.filter(user=request.user, assignment=assignment)
     context = {
         "assignment": assignment,
         "attempts": attempts
@@ -39,6 +26,9 @@ def start(request):
     return render(request, "quiz/start.html", context=context)
 
 def create(request, assignment_id):
+    referer = request.META.get('HTTP_REFERER')
+    if not referer:
+        raise PermissionDenied
     quiz = Quiz.objects.all().first()
     assignment = Assignment.objects.all().filter(id=assignment_id).first()
     if not assignment:
@@ -96,3 +86,16 @@ def quiz(request, attempt_id=0):
         context["questions"] = questions.JSON
     
     return render(request, "quiz/quiz.html", context=context)
+
+def save(request, attempt_id):
+    print(f"SAVE: {attempt_id}")
+    # ToDo:
+    return redirect(reverse("quiz", kwargs={"attempt_id": attempt_id}))
+
+def delete(request, attempt_id):
+    print(f"DELETE: {attempt_id}")
+    attempt = get_object_or_404(Attempt, pk=attempt_id)
+    if request.user != attempt.user:
+        raise PermissionDenied()
+    assignment_id = attempt.assignment.id
+    return redirect(reverse("start", kwargs={"assignment_id": assignment_id}))

@@ -3,7 +3,7 @@
 <h1>Ready to start?</h1>
 <article>
     <p><strong>Assignment: </strong>{{ assignment.description }}</p>
-    <footer><a role="button" href="{% url 'quiz' 0 %}">Attempt</a></footer>
+    <footer><a role="button" href="{% url 'create' assignment.id %}">Attempt</a></footer>
 </article>
 {% if attempts %}
 <article>
@@ -17,7 +17,7 @@
             <a href="{% url 'quiz' attempt.id %}">Resume</a>
             {% endif %}
             <a>Submit</a>
-            <a class="danger">Delete</a>
+            <a class="danger" href="{% url 'delete' attempt.id %}" onclick="deleteConfirmation()">Delete</a>
         </li>
         {% endfor %}
     </ul>

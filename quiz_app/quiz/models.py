@@ -24,6 +24,6 @@ class Attempt(models.Model):
     answer = models.JSONField(null=True, blank=True)
     active = models.BooleanField(default=True)
     def __str__(self):
-        return f"{self.user} attempt on {self.assignment} (started {self.start})"
+        return f"[{self.id}] {self.user} attempt on {self.assignment} (started {self.start})"
     
     

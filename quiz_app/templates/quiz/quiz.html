@@ -6,22 +6,32 @@
     {% csrf_token %}
 
     {% for question in questions %}
-    <h2>{{ question.text|safe }}</h2>
-    {% if question.type == 'single' %}
-    {% for option in question.options %}
-    <input type="radio" id="{{ question.id }}_{{ forloop.counter }}" name="{{ question.id }}"
-        value="{{ forloop.counter }}">
-    <label for="{{ question.id }}_{{ forloop.counter }}">{{ option|safe }}</label><br>
+    <article>
+        <header>
+            <h2>Domanda {{ forloop.counter }}</h2>
+        </header>
+        <fieldset>
+            <legend>{{ question.text|safe }}</legend>
+            {% if question.type == 'single' %}
+            {% for option in question.options %}
+            <label for="{{ question.id }}_{{ forloop.counter }}">
+                <input type="radio" id="{{ question.id }}_{{ forloop.counter }}" name="{{ question.id }}" value="{{ forloop.counter }}">
+                {{ option|safe }}
+            </label>
+            {% endfor %}
+            {% elif question.type == 'multiple' %}
+            {% for option in question.options %}
+            <label for="{{ question.id }}_{{ forloop.counter }}}">
+                <input type="checkbox" id="{{ question.id }}_{{ forloop.counter }}" name="{{ question.id }}" value="{{ forloop.counter }}">
+                {{ option|safe }}
+            </label>
+        {% endfor %}
+        {% endif %}
+        </fieldset>
+    </article>
     {% endfor %}
-    {% elif question.type == 'multiple' %}
-    {% for option in question.options %}
-    <input type="checkbox" id="{{ question.id }}_{{ forloop.counter }}" name="{{ question.id }}"
-        value="{{ forloop.counter }}">
-    <label for="{{ question.id }}_{{ forloop.counter }}}">{{ option|safe }}</label><br>
-    {% endfor %}
-    {% endif %}
-    {% endfor %}
-
-    <input type="submit" value="Submit">
+    
+    <a role="button" href="{% url 'save' attempt %}">Save</a>
+    <input type="submit" value="Submit" style="width: auto;">
 </form>
 {% endblock %}
