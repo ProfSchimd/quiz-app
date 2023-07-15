@@ -6,6 +6,7 @@
 
 {% if assignments %}
 <select id="assignSelector" name="assignSelect" onchange="redirectToSelectedOption()">
+    <option value="">-- Select a Quiz --</option>
     {% for assignment in assignments %}
     <option value="{% url 'start' assignment.id %}">{{ assignment.description }} ({{ assignment.id }})</option>
     {% endfor %}

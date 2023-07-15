@@ -21,4 +21,5 @@ urlpatterns = [
     path('', include('quiz.urls'), name='quiz'),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('quizapp/', include('QuizApp.urls'), name='quizapp'),
 ]
