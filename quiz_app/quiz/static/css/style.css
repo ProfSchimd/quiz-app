@@ -1,6 +1,6 @@
 [data-theme="light"],
 :root:not([data-theme="dark"]) {
-    --danger: #9D0806;
+    --danger: #a30704;
 }
 
 @media only screen and (prefers-color-scheme: dark) {
@@ -12,3 +12,14 @@
 .danger {
     color: var(--danger);
 }
+
+ul.errorlist {
+    color: var(--danger);
+    margin-bottom: 0;
+    padding: 0;
+    li {
+        list-style-type: none;
+        padding: 0;
+    }
+}
+

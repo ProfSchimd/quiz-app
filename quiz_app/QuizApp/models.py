@@ -29,17 +29,23 @@ class Group(models.Model):
     year = models.CharField(max_length=16, null=True)
     members = models.ManyToManyField(User)
     
+    
 
 class Subject(models.Model):
-    name = models.CharField(max_length=128)
+    name = models.CharField(max_length=128, unique=True)
     short_name = models.CharField(max_length=8)
     description = models.TextField(null=True)
     
+    def __str__(self) -> str:
+        return f"{self.name} ({self.short_name})"
+    
 
 class Tag(models.Model):
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=32, unique=True)
     description = models.TextField(null=True)
     
+    def __str__(self) -> str:
+        return f"{self.name}"
 
 class Question(models.Model):
     QUESTION_TYPE = [
@@ -48,7 +54,7 @@ class Question(models.Model):
         ("INVERTIBLE", "Invertible"),
         ("FILL", "Fill"),
     ]
-    questione_type = models.CharField(max_length=16, choices=QUESTION_TYPE)
+    question_type = models.CharField(max_length=16, choices=QUESTION_TYPE)
     # ToDo: set check on range
     weight = models.IntegerField(default=1)
     text_and_keys = models.JSONField()
