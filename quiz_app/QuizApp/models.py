@@ -59,62 +59,68 @@ class Question(models.Model):
     weight = models.IntegerField(default=1)
     text_and_keys = models.JSONField()
     creator = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    subject = models.ForeignKey(Subject, null=True, on_delete=models.SET_NULL)
-    tags = models.ManyToManyField(Tag)
+    subject = models.ForeignKey(Subject, null=True, blank=True, on_delete=models.SET_NULL)
+    tags = models.ManyToManyField(Tag, blank=True)
+    
+    def __str__(self):
+        
+        return f"{self.id}: {self.text_and_keys[:30]} ({self.get_question_type_display()})"
+    
     
 
 class Collection(models.Model):
     name = models.CharField(max_length=64)
-    description = models.TextField(null=True)
-    topic = models.CharField(max_length=64, null=True)
-    subject = models.ForeignKey(Subject, null=True, on_delete=models.SET_NULL)
+    description = models.TextField(null=True, blank=True)
+    topic = models.CharField(max_length=64, null=True, blank=True)
+    subject = models.ForeignKey(Subject, null=True, blank=True, on_delete=models.SET_NULL)
     is_virtual = models.BooleanField(default=False)
     questions = models.ManyToManyField(Question)
     
 class Assignment(models.Model):
     # General description
     name = models.CharField(max_length=256)
-    description = models.TextField(null=True)
+    description = models.TextField(null=True, blank=True)
     # Generation options
     question_number = models.IntegerField()
-    generating_options = models.JSONField(null=True)
+    generating_options = models.JSONField(null=True, blank=True)
     # Attempt options
-    deadline = models.DateTimeField()
-    timer = models.DurationField()
-    max_attempts = models.IntegerField()
+    deadline = models.DateTimeField(blank=True, null=True)
+    timer = models.DurationField(blank=True, null=True)
+    max_attempts = models.IntegerField(default=1)
     is_resumable = models.BooleanField(default=True)
     is_deletable = models.BooleanField(default=False)
-    score = models.IntegerField(null=True)
+    score = models.IntegerField(null=True, blank=True, default=10)
     # Feedback options
     FB_TYPE = [
         ("TEAC", "Teacher review"),
         ("PEER", "Peer review")
     ]
-    feedback_type = models.CharField(max_length=4, choices=FB_TYPE)
-    feedback_delay = models.DurationField()
+    feedback_type = models.CharField(max_length=4, choices=FB_TYPE, default="TEAC")
+    feedback_delay = models.DurationField(blank=True, null=True)
     FB_REVIEWER = [
         (0, 'Teacher assigned'),
         (1, 'Random assigned')
     ]
-    feedback_reviewer = models.IntegerField(choices=FB_REVIEWER)
+    feedback_reviewer = models.IntegerField(choices=FB_REVIEWER, default=0)
     FB_BLIND = [
         (0, 'Open'),
         (1, 'Hide Reviewer'),
         (2, 'Hide Author'),
         (3, 'Double Blind')
     ]
-    feedback_blind = models.IntegerField(choices=FB_BLIND)
+    feedback_blind = models.IntegerField(choices=FB_BLIND, default=0)
     # Foreign keys
     collection = models.ForeignKey(Collection, on_delete=models.CASCADE)
     creator = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     
 class Attempt(models.Model):
-    start = models.DateTimeField(blank=True)
-    seed = models.CharField(max_length=32, default="")
-    saved_answer = models.JSONField(null=True)
-    saved_time = models.DateTimeField(null=True)
-    submit_answer = models.JSONField(null=True)
-    submit_time = models.DateTimeField(null=True)
+    start = models.DateTimeField(null=True, blank=True)
+    seed = models.CharField(max_length=32, blank=True, default="")
+    json_text = models.JSONField(null=True, blank=True)
+    saved_answer = models.JSONField(null=True, blank=True)
+    saved_time = models.DateTimeField(null=True, blank=True)
+    submit_answer = models.JSONField(null=True, blank=True)
+    submit_time = models.DateTimeField(null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="attempting_user")
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, null=True)
 

@@ -1,16 +1,22 @@
 [data-theme="light"],
 :root:not([data-theme="dark"]) {
     --danger: #a30704;
+    --success: #04a304;
 }
 
 @media only screen and (prefers-color-scheme: dark) {
     :root:not([data-theme]) {
         --danger: #F9514E;
+        --success: #46d746;
     }
   }
 
 .danger {
     color: var(--danger);
+}
+
+.success {
+    color: var(--success);
 }
 
 ul.errorlist {
@@ -21,5 +27,26 @@ ul.errorlist {
         list-style-type: none;
         padding: 0;
     }
+}
+
+div.grid {
+    display: flex;
+    align-items: center;
+    
+}
+
+div.grid a:hover {
+    text-decoration: none;
+}
+
+div.grid a {
+    text-decoration: none;
+    font-size: 1.5rem;
+    
+}
+
+div.grid > * {
+    flex-grow: 1;
+    margin: 5px;
 }
 

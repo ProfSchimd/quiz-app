@@ -32,3 +32,8 @@ class CreateQuestionView(PermissionRequiredMixin, CreateView):
 # Create your views here.
 def index(request):
     return render(template_name="QuizApp/index.html", context={}, request=request)
+
+def create_question(request):
+    if request.method == "POST":
+        print(request.POST)
+    return render(template_name="QuizApp/create_question.html", context={}, request=request)

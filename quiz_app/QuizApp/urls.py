@@ -6,7 +6,8 @@ from . import views
 urlpatterns = [
     path("tag/new", login_required(views.CreateTagView.as_view())),
     path("subject/new",  views.CreateSubjectView.as_view()),
-    path("question/new",  views.CreateQuestionView.as_view()),
+    path("question/new",  views.create_question),
+    
     path("", views.index, name="index"),
    
 ]
