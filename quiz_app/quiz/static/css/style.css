@@ -47,6 +47,20 @@ div.grid a {
 
 div.grid > * {
     flex-grow: 1;
-    margin: 5px;
+    margin-right: 5px;
+    margin-bottom: 0px;
+}
+
+#tagList {
+    margin: 10px 0px;
+}
+
+#tagList a {
+    margin: 0;
+    margin-right: 4px;
+    padding: 2px;
+    &::before {
+        content: '#';
+    }
 }
 

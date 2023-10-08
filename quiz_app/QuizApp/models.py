@@ -64,7 +64,7 @@ class Question(models.Model):
     
     def __str__(self):
         
-        return f"{self.id}: {self.text_and_keys[:30]} ({self.get_question_type_display()})"
+        return f"{self.id}: {self.text_and_keys} ({self.get_question_type_display()})"
     
     
 

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+    {% block content %}
+    <h1>Questions</h1>
+    {% if filter %}
+{% endif %}
+<h1>Upload questions</h1>
+<form method="post" enctype="multipart/form-data" action={% url 'question_upload_confirm' %}>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="submit">
+</form>
+{% endblock %}

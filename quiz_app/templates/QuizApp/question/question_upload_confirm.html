@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Confirm Upload</h1>
+
+
+Select questions to upload
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden", name="name", value="{{ name  }}">
+    <input type="hidden", name="subject", value="{{ subject }}">
+    {% for q in data %}
+    <div>
+        <input type="hidden" name="confirmed-data" value="{{ rawData }}">
+        <input type="checkbox" name="q_{{ q.id }}">
+        {{ q.id }} - {{ q.type }}
+    </div>
+    {% endfor %}
+    <input type="submit" value="Confirm">
+</form>
+<div>
+    <code>{{ rawData }}</code>
+</div>
+{% endblock %}

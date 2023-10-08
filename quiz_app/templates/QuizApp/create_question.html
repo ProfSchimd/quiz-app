@@ -44,13 +44,22 @@
     <div class="grid">
         <a class="bi-plus-circle-fill success" onclick="addOption()"></a>
     </div>
+
+    <label for="inputTag">Tags</label>
+    <div class="grid">
+        <input id="inputTag" type="text" placeholder="Add a tag">
+        <a class="bi-plus-circle-fill" onclick="addTag()"></a>
+    </div>
+    <div id="tagList">
+
+    </div>
     <div>
         <input type="submit" value="Submit">
     </div>
 </form>
 </article>
 <script>
-    //var typeSelected = "Invertible"
+    var tagList = [];
     function typeSelect(e) {
         var typeSelected = document.getElementById("q_type").value;
         document.getElementById("textInverted").disabled = (typeSelected !== "Invertible");
@@ -61,7 +70,6 @@
             console.log(`Selected ${count} options`);
             if (count > 1) {
                 alert("With Single question select exactly 1 solution");
-                
             }
         }
     }
@@ -104,5 +112,46 @@
         optionsList.appendChild(optionItem); // Add the new option to the list
         renameOptions();
     }
+
+    function addTag() {
+        const inputTag = document.querySelector("#inputTag");
+        const newTag = inputTag.value;
+        if (newTag && !tagList.some(tag => tag.toLowerCase() === newTag.toLowerCase())) {
+            tagList.push(newTag);
+        }
+        showTags(); 
+    }
+
+    function removeTag(tag) {
+        tagList = tagList.filter(t => t.toLowerCase() !== tag.toLowerCase());
+        showTags();
+    }
+
+    function showTags() {
+        const tagDiv = document.querySelector("#tagList");
+        // remove all children
+        while(tagDiv.firstChild) {
+            tagDiv.removeChild(tagDiv.firstChild);
+        }
+        tagList.map( (tag, index) => {
+            const tagP = document.createElement("a");
+            tagP.setAttribute("href", "");
+            tagP.setAttribute("role", "button");
+            tagP.addEventListener("click", e => {
+                e.preventDefault();
+                removeTag(tag);
+                console.log("Remove :" + tag)
+            });
+            tagP.textContent = tag;
+            tagDiv.appendChild(tagP);
+            const tagIn = document.createElement("input");
+            tagIn.setAttribute("type", "hidden");
+            tagIn.setAttribute("name", `tag_${index}`);
+            tagIn.value = tag;
+            tagDiv.appendChild(tagIn);
+        });
+    }
+
+    
 </script>
 {% endblock %}
