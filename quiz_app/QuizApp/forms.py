@@ -12,4 +12,11 @@ class UploadFileForm(forms.Form):
     file = forms.FileField()
     
 class QuestionForm(forms.Form):
-    q_id = forms.CharField(max_length=255)
+    
+    def __init__(self, options, *args, **kwargs):
+        super(QuestionForm, self).__init__(*args, **kwargs)
+        self.fields["answers"] = forms.MultipleChoiceField(
+            required=False,
+            widget=forms.CheckboxSelectMultiple,
+            choices=options,
+        )

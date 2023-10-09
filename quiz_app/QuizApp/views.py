@@ -1,10 +1,10 @@
 import json
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic.edit import CreateView
 
-from .forms import UploadFileForm
+from .forms import QuestionForm, UploadFileForm
 from .models import Question, Subject, Tag
 
 # Views implemented with Django helpers
@@ -26,6 +26,24 @@ class CreateSubjectView(PermissionRequiredMixin, CreateView):
 # Views requiring custom logic (w.r.t. Django helpers)
 def index(request):
     return render(template_name="QuizApp/index.html", context={}, request=request)
+
+
+def question_show(request, q_id=0):
+    if request.method == "POST":
+        # TODO: Process request of "Question Creation" view
+        print(request.POST)
+    q: Question = get_object_or_404(Question, pk=q_id)
+    form = QuestionForm(options=enumerate(q.text_and_keys["options"]))
+    return render(
+        template_name="QuizApp/question/question_n.html", 
+        context={
+            "q_id": q.id,
+            "type": q.get_question_type_display(),
+            "text": "<br>".join(q.text_and_keys["text"]) if q.get_question_type_display() == "Invertible" else q.text_and_keys["text"],
+            "tags": [t.name for t in q.tags.all()],
+            "form": form
+        },
+        request=request)
 
 def create_question(request):
     if request.method == "POST":
@@ -74,7 +92,7 @@ def question_upload_confirm(request):
                     )
                     # Create tags that may not exist
                     qModel.save()
-                    if q["tags"]:
+                    if q.get("tags"):
                         for tag in q["tags"]:
                             tag, _ = Tag.objects.get_or_create(name__iexact=tag, defaults={"name": tag})
                             qModel.tags.add(tag)

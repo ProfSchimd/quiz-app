@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ type }} Question (id: {{ q_id }})</h2>
+<h3>
+{% for t in tags %}
+#{{ t }}
+{% endfor %}
+</h3>
+<p>
+    Text: <br>
+    {{ text | safe }}
+</p>
+<form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="submit">
+</form>
+{% endblock %}
