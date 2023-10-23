@@ -97,7 +97,7 @@ def question_upload_confirm(request):
                             tag, _ = Tag.objects.get_or_create(name__iexact=tag, defaults={"name": tag})
                             qModel.tags.add(tag)
                     qModel.save()
-            return redirect("question_upload")
+            return redirect("question_show_all")
         
         # Process and render confirmation page
         file = request.FILES.get('file')
