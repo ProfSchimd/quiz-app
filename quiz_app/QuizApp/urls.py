@@ -10,6 +10,7 @@ urlpatterns = [
     
     path("question/show/<int:q_id>", views.question_show, name="question_show"),
     path("question/show/all", views.question_list, name="question_show_all"),
+    path("question/show/tags", views.question_show_by_tags, name="question_show_by_tags"),
     path("question/new",  views.create_question, name="question_new"),
     path("question/upload", views.question_upload, name="question_upload"),
     path("question/upload/confirm", views.question_upload_confirm, name="question_upload_confirm"),

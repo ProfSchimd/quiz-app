@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic.edit import CreateView
 
@@ -44,6 +45,21 @@ def question_show(request, q_id=0):
             "form": form
         },
         request=request)
+    
+def question_show_by_tags(request):
+    tag_list = request.GET.getlist("tag")
+    if not tag_list:
+        return redirect("question_show_all")
+
+    # Create a Q object that performs a case-insensitive lookup on tag names
+    tag_queries = Q()
+    for tag_name in tag_list:
+        tag_queries |= Q(tags__name__iexact=tag_name)
+
+    # Use the Q object in the filter
+    questions = Question.objects.filter(tag_queries)
+
+    return render(template_name="QuizApp/question/question_list.html", context={"questions": questions}, request=request)
 
 def create_question(request):
     if request.method == "POST":
