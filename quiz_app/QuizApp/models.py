@@ -62,9 +62,18 @@ class Question(models.Model):
     subject = models.ForeignKey(Subject, null=True, blank=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField(Tag, blank=True)
     
+    def get_display_text(self, separator=" ", positive_pre="(+)", negative_pre="(-)"):
+        if self.question_type == "INVERTIBLE":
+            return f"{positive_pre} {self.text_and_keys['text'][0]}{separator}{negative_pre} {self.text_and_keys['text'][1]}"
+        elif self.question_type == "FILL":
+            return self.text_and_keys["tofill"]
+        return self.text_and_keys["text"]
+    
+    def get_html_display_text(self):
+        return self.get_display_text(separator="<br>")
+    
     def __str__(self):
-        
-        return f"{self.id}: {self.text_and_keys} ({self.get_question_type_display()})"
+        return f"{self.id}: {self.get_display_text()} ({self.get_question_type_display()})"
     
     
 

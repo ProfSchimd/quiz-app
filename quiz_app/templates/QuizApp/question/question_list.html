@@ -5,37 +5,11 @@
 {% endif %}
 <form method="post">
     {% csrf_token %}
-   
-    {% for q in questions %}
-    <article>
-        <header>
-            <h1>
-                <input name={{ q.id }} type="checkbox">
-                {{ q.id }} ({{ q.get_question_type_display }})
-            </h1>
-        </header>
-            
-            <p>
-                <b>Text:</b> <br>
-                {{ q.text_and_keys.text | safe }} <br>
-            </p>
-            <b>Options: </b>
-            <ul>
-                {% for o in q.text_and_keys.options %}
-                <li>{{ o }}</li>
-                {% endfor %}
-            </ul>
-            <p>
-                <b>Key: </b> <code>{{ q.text_and_keys.correct }}</code>
-            </p>
-            <footer>
-                {% for t in q.tags.all %}
-                    <code>#{{ t }}</code>
-                {% endfor %}
-            </footer>
-    </article>
-    {% endfor %}
-    Total {{ questions | length }} question(s)
+    
+    {% block question_list %}
+        {% include "QuizApp/question/question_list_as_table.html" %}
+    {% endblock %}
+
     <input type="submit" value="Save">
 </form>
 {% endblock %}

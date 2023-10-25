@@ -1,0 +1,30 @@
+<table role="grid">
+    {% for q in questions %}
+    <tr>
+        <td><input name={{ q.id }} type="checkbox"></td>
+        <td>{{ q.id }} ({{ q.get_question_type_display.0 }})</td>
+        <td>
+            <details>
+                <summary>{{ q.get_html_display_text | safe }}</summary>
+                <b>Options: </b>
+                <ul>
+                    {% for o in q.text_and_keys.options %}
+                    <li>{{ o }}</li>
+                    {% endfor %}
+                </ul>
+                <p>
+                    <b>Key: </b> <code>{{ q.text_and_keys.correct }}</code>
+                </p>
+            </details>
+        </td>
+
+        <td>
+            {% for t in q.tags.all %}
+            <code>#{{ t }}</code>
+            {% endfor %}
+        </td>
+        <!-- </footer> -->
+    </tr>
+    {% endfor %}
+</table>
+Total {{ questions | length }} question(s)
