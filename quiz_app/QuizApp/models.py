@@ -75,6 +75,18 @@ class Question(models.Model):
     def __str__(self):
         return f"{self.id}: {self.get_display_text()} ({self.get_question_type_display()})"
     
+    def to_json(self):
+        print([str(t) for t in self.tags.all()])
+        return {
+            "id": str(self.id),
+            "type": self.get_question_type_display().lower(),
+            "weight": self.weight,
+            "text": self.text_and_keys["text"],
+            "options": self.text_and_keys["options"],
+            "correct": self.text_and_keys["correct"],
+            "tags": [t.name for t in self.tags.all()]
+        }
+    
     
 
 class Collection(models.Model):

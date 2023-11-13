@@ -3,7 +3,7 @@
     <h1>Questions</h1>
     {% if filter %}
 {% endif %}
-<form method="post">
+<form method="post" action={% url 'question_export' %}>
     {% csrf_token %}
     
     {% block question_list %}

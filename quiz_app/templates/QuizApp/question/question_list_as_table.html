@@ -1,7 +1,7 @@
 <table role="grid">
     {% for q in questions %}
     <tr>
-        <td><input name={{ q.id }} type="checkbox"></td>
+        <td><input name="id_{{ q.id }}" type="checkbox"></td>
         <td>{{ q.id }} ({{ q.get_question_type_display.0 }})</td>
         <td>
             <details>

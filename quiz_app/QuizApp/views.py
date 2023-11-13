@@ -2,6 +2,7 @@ import json
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic.edit import CreateView
 
@@ -46,33 +47,42 @@ def question_show(request, q_id=0):
         },
         request=request)
     
-def question_show_by_tags(request):
+def question_list(request):
+    if request.method == "POST":
+        # TODO: process request from the "Question List" view
+        print(request.POST)
+    query = Q()
     tag_list = request.GET.getlist("tag")
-    if not tag_list:
-        return redirect("question_show_all")
-
-    # Create a Q object that performs a case-insensitive lookup on tag names
-    tag_queries = Q()
-    for tag_name in tag_list:
-        tag_queries |= Q(tags__name__iexact=tag_name)
-
-    # Use the Q object in the filter
-    questions = Question.objects.filter(tag_queries)
-
+    if tag_list:
+        for tag_name in tag_list:
+            query |= Q(tags__name__iexact=tag_name)
+    subject = request.GET.get("subject")
+    if subject:
+        query &= Q(subject__short_name__iexact=subject)
+    questions = Question.objects.filter(query)
     return render(template_name="QuizApp/question/question_list.html", context={"questions": questions}, request=request)
 
-def create_question(request):
+
+def question_export(request):
+    if request.method == "POST":
+        # print(request.POST)
+        question_ids = [key.split("_")[1] for key in request.POST if key.startswith("id_")]
+        questions = Question.objects.filter(pk__in=question_ids)
+        response = HttpResponse(
+            content_type="application/json",
+            headers={"Content-Disposition": 'attachment; filename="export.json"'},
+        )    
+        import json
+        json.dump([q.to_json() for q in questions], response)
+        return response
+    return redirect("question_show")
+
+def question_create(request):
     if request.method == "POST":
         # TODO: Process request of "Question Creation" view
         print(request.POST)
     return render(template_name="QuizApp/create_question.html", context={}, request=request)
 
-def question_list(request):
-    if request.method == "POST":
-        # TODO: process request from the "Question List" view
-        print(request.POST)
-    questions = Question.objects.all()
-    return render(template_name="QuizApp/question/question_list.html", context={"questions": questions}, request=request)
     
 # TODO: This can be transformed into a form view
 def question_upload(request):        
@@ -113,7 +123,7 @@ def question_upload_confirm(request):
                             tag, _ = Tag.objects.get_or_create(name__iexact=tag, defaults={"name": tag})
                             qModel.tags.add(tag)
                     qModel.save()
-            return redirect("question_show_all")
+            return redirect("question_show")
         
         # Process and render confirmation page
         file = request.FILES.get('file')
