@@ -1,15 +1,29 @@
 {% extends "base.html" %}
-    {% block content %}
-    <h1>Questions</h1>
-    {% if filter %}
-{% endif %}
+{% load static %}
+{% block extra_scripts %}
+<script src="{% static '/js/question_filter.js' %}"></script>
+{% endblock %}
+{% block content %}
+<h1>Questions</h1>
 <form method="post" action={% url 'question_export' %}>
     {% csrf_token %}
     
     {% block question_list %}
         {% include "QuizApp/question/question_list_as_table.html" %}
     {% endblock %}
-
-    <input type="submit" value="Save">
+    
+    <fieldset>
+        <div class="grid">
+            <label for="randomCheck">
+                <input id="randomCheck" name="random" type="checkbox" role="switch">
+                Random
+            </label>
+            <label for="randomSeed">
+                Seed
+                <input id="randomSeed" name="seed" type="text" placeholder="Random seed" disabled required>
+            </label>
+         </div>
+        <button class="bi bi-download" role="button"> JSON</button>
+    </fieldset>
 </form>
 {% endblock %}

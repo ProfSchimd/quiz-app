@@ -48,9 +48,6 @@ def question_show(request, q_id=0):
         request=request)
     
 def question_list(request):
-    if request.method == "POST":
-        # TODO: process request from the "Question List" view
-        print(request.POST)
     query = Q()
     tag_list = request.GET.getlist("tag")
     if tag_list:
@@ -62,10 +59,10 @@ def question_list(request):
     questions = Question.objects.filter(query)
     return render(template_name="QuizApp/question/question_list.html", context={"questions": questions}, request=request)
 
-
 def question_export(request):
     if request.method == "POST":
-        # print(request.POST)
+        if request.POST.get("random"):
+            print(request.POST.get("seed"))
         question_ids = [key.split("_")[1] for key in request.POST if key.startswith("id_")]
         questions = Question.objects.filter(pk__in=question_ids)
         response = HttpResponse(
@@ -83,7 +80,6 @@ def question_create(request):
         print(request.POST)
     return render(template_name="QuizApp/create_question.html", context={}, request=request)
 
-    
 # TODO: This can be transformed into a form view
 def question_upload(request):        
     form = UploadFileForm()

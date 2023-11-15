@@ -1,4 +1,5 @@
-<table role="grid">
+<table id="questionList" role="grid">
+    <tr><td><input id="allSelector" type="checkbox"></td></tr>
     {% for q in questions %}
     <tr>
         <td><input name="id_{{ q.id }}" type="checkbox"></td>
@@ -23,8 +24,6 @@
             <code>#{{ t }}</code>
             {% endfor %}
         </td>
-        <!-- </footer> -->
     </tr>
     {% endfor %}
 </table>
-Total {{ questions | length }} question(s)
