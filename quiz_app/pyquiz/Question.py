@@ -19,15 +19,31 @@ class Question:
 
 class DisplayQuestion(Question):
     """DisplayQuestion are those rendered."""
+    
+    def to_dict(self):
+        d = {
+            "id": self.id,
+            "type": self._type,
+            "weight": self._weight,
+            "text": self._text,
+            "options": self._options,
+            "correct": self._correct,
+            "tags": self._tags    
+        }
+        return d
 
 
 class CheckboxQuestion(DisplayQuestion):
-    def __init__(self, id, text, weight, options=[], correct=[], type=None):
+    def __init__(self, id, text, weight, options=[], correct=[], type=None, tags=None):
         super().__init__(id, text, weight)
         self._options = options
         self._correct = correct
         if type is not None:
             self._type = type
+            self._type = "single" if type == "single" else "multiple"
+        if tags is not None:
+            self._tags = tags
+        
 
 class FillQuestion(DisplayQuestion):
     def __init__(self, id, text, to_fill, weight, correct=[], type=None):
@@ -87,11 +103,13 @@ class RawQuestion(Question):
         
 
 class RawChoiceQuestion(RawQuestion):
-    def __init__(self, id, text, weight, options, correct, type='single'):
+    def __init__(self, id, text, weight, options, correct, type='single', tags=None):
         super().__init__(id, text, weight)
         self._options = options
         self._correct = correct
         self._type = type
+        if tags is not None:
+            self._tags = tags
 
     def to_display_question(self):
  
@@ -105,7 +123,7 @@ class RawChoiceQuestion(RawQuestion):
         random.shuffle(indexes)
         options = [self._options[i] for i in indexes]
         correct = [self._correct[variant][i] for i in indexes]
-        return CheckboxQuestion(self.id, text, self._weight, options, correct, self._type)
+        return CheckboxQuestion(self.id, text, self._weight, options, correct, self._type, self._tags)
 
     @classmethod
     def from_dict(cls, d):
@@ -126,7 +144,7 @@ class RawChoiceQuestion(RawQuestion):
         elif d['type'] == 'multi-variate':
             text = d['text']
             correct = d['correct']
-        return cls(d['id'], text, d.get('weight'), d['options'], correct, d['type'])
+        return cls(d['id'], text, d.get('weight'), d['options'], correct, type=d['type'], tags=d.get('tags'))
         
 
 class RawFillQuestion(RawQuestion):

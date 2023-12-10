@@ -1,4 +1,5 @@
 import json
+import random
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
@@ -8,6 +9,8 @@ from django.views.generic.edit import CreateView
 
 from .forms import QuestionForm, UploadFileForm
 from .models import Question, Subject, Tag
+
+from pyquiz.pyquiz import parse_question_json, create_quiz
 
 # Views implemented with Django helpers
 class CreateTagView(PermissionRequiredMixin, CreateView):
@@ -61,16 +64,20 @@ def question_list(request):
 
 def question_export(request):
     if request.method == "POST":
-        if request.POST.get("random"):
-            print(request.POST.get("seed"))
         question_ids = [key.split("_")[1] for key in request.POST if key.startswith("id_")]
         questions = Question.objects.filter(pk__in=question_ids)
         response = HttpResponse(
             content_type="application/json",
             headers={"Content-Disposition": 'attachment; filename="export.json"'},
-        )    
-        import json
-        json.dump([q.to_json() for q in questions], response)
+        )
+        jsonQuestions = [q.to_json() for q in questions]
+        if request.POST.get("random"):
+            seed = request.POST.get("seed")
+            random.seed(seed)
+            
+            jsonQuestions = create_quiz(parse_question_json(jsonQuestions), len(questions))
+            jsonQuestions = [q.to_dict() for q in jsonQuestions]
+        json.dump(jsonQuestions, response, ensure_ascii=False, indent=4)
         return response
     return redirect("question_show")
 

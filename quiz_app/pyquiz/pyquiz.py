@@ -4,12 +4,12 @@ import random
 import argparse
 import os.path
 
-import Question as qst
-from rendering.latex_rendering import latex_render
-from rendering.text_rendering import text_render
-from rendering.html_rendering import html_render
-from rendering.json_rendering import json_render
-from util import get_similarity_matrix
+from . import Question as qst
+from .rendering.latex_rendering import latex_render
+from .rendering.text_rendering import text_render
+from .rendering.html_rendering import html_render
+from .rendering.json_rendering import json_render
+from .util import get_similarity_matrix
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -73,7 +73,8 @@ def render_quiz(quiz: list, template:str, text: str, solution: str, track_n: int
     ext = extensions.get(render, '')
     text_path: str = os.path.join(destination, f'{text}.{ext}')
     solution_path: str = os.path.join(destination, f'{solution}.{ext}')
-    template: str = template if template is not None else f'template.{ext}'
+    print(os.path.abspath(__file__))
+    template: str = template if template is not None else f'{os.path.dirname(__file__)}/template.{ext}'
     
     if render.lower() == 'latex':
         latex_render(quiz, template, text_path, solution_path, track_n)
