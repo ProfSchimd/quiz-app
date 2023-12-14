@@ -96,6 +96,9 @@ class Collection(models.Model):
     is_virtual = models.BooleanField(default=False)
     questions = models.ManyToManyField(Question)
     
+    def __str__(self) -> str:
+        return f"{self.subject.short_name}: {self.name} ({self.id})"
+    
 class Assignment(models.Model):
     # General description
     name = models.CharField(max_length=256)

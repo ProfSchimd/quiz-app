@@ -73,7 +73,6 @@ def render_quiz(quiz: list, template:str, text: str, solution: str, track_n: int
     ext = extensions.get(render, '')
     text_path: str = os.path.join(destination, f'{text}.{ext}')
     solution_path: str = os.path.join(destination, f'{solution}.{ext}')
-    print(os.path.abspath(__file__))
     template: str = template if template is not None else f'{os.path.dirname(__file__)}/template.{ext}'
     
     if render.lower() == 'latex':

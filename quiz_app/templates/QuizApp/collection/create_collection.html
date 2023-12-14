@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<article>
+    <header>
+        <hgroup>
+            <h1>Create new Collection</h1>
+            <h2>Provide information</h2>
+        </hgroup>
+    </header>
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        {% for q in questions %}
+            <input type="hidden" name=id_{{q.id}}>
+        {% endfor %}
+        <input type="submit" value="Save">
+    </form>
+    <h3>Questions inserted</h3>
+    <ul>
+        {% for q in questions %}
+        <li>{{q}}</li>
+        {% endfor %}
+    </ul>
+</article>
+{% endblock %}

@@ -1,14 +1,16 @@
 import json
 import random
+from typing import Any
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
+from django.forms.models import BaseModelForm
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic.edit import CreateView
 
 from .forms import QuestionForm, UploadFileForm
-from .models import Question, Subject, Tag
+from .models import Collection, Question, Subject, Tag
 
 from pyquiz.pyquiz import parse_question_json, create_quiz
 
@@ -27,6 +29,30 @@ class CreateSubjectView(PermissionRequiredMixin, CreateView):
     fields =["name", "short_name", "description"]
     template_name = "QuizApp/create_subject.html"
     success_url = "/quizapp"
+    
+class CreateCollectionView(PermissionRequiredMixin, CreateView):
+    permission_required = "quizapp.add_collection"
+    model = Collection
+    fields = ["name", "description", "topic", "subject", "is_virtual"]
+    template_name = "QuizApp/collection/create_collection.html"
+    success_url="/"
+    
+    def form_valid(self, form):
+        model = form.save()
+        questions = questions_from_post(self.request.POST)
+        print(self.request.POST)
+        model.questions.set(questions)
+        model.save()
+        return super().form_valid(form)
+    
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        questions = questions_from_post(self.request.POST)
+        context["questions"] = questions
+        return context
+    
+    
 
 # Views requiring custom logic (w.r.t. Django helpers)
 def index(request):
@@ -64,8 +90,9 @@ def question_list(request):
 
 def question_export(request):
     if request.method == "POST":
-        question_ids = [key.split("_")[1] for key in request.POST if key.startswith("id_")]
-        questions = Question.objects.filter(pk__in=question_ids)
+        # question_ids = [key.split("_")[1] for key in request.POST if key.startswith("id_")]
+        # questions = Question.objects.filter(pk__in=question_ids)
+        questions = questions_from_post(request.POST)
         response = HttpResponse(
             content_type="application/json",
             headers={"Content-Disposition": 'attachment; filename="export.json"'},
@@ -144,3 +171,11 @@ def question_upload_confirm(request):
                 request=request
             )
     return redirect("question_upload")
+
+def collection_from_questions(request):
+    return redirect("index")
+
+def questions_from_post(post):
+    question_ids = [key.split("_")[1] for key in post if key.startswith("id_")]
+    questions = Question.objects.filter(pk__in=question_ids)
+    return questions

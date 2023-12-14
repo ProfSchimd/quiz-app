@@ -5,7 +5,7 @@
 {% endblock %}
 {% block content %}
 <h1>Questions</h1>
-<form method="post" action={% url 'question_export' %}>
+<form method="post">
     {% csrf_token %}
     
     {% block question_list %}
@@ -23,7 +23,8 @@
                 <input id="randomSeed" name="seed" type="text" placeholder="Random seed" disabled required>
             </label>
          </div>
-        <button class="bi bi-download" role="button"> JSON</button>
+        <button formaction={% url 'question_export' %} class="bi bi-download" role="button"> JSON</button>
+        <button formaction={% url 'collection_from_questions' %} class="bi bi-save"> Save</button>
     </fieldset>
 </form>
 {% endblock %}
