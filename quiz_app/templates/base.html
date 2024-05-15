@@ -19,7 +19,14 @@
             </ul>
             <ul>
                 {% if user.is_authenticated %}
-                    <li><a role="button" href="{% url 'logout' %}"><i class="bi-box-arrow-right"></i> {{ user.username }}</a></li>
+                
+
+                    <li>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button role="button" type="submit"><i class="bi-box-arrow-right"></i> {{ user.username }}</button>
+                        </form>
+                    </li>
                 {% else %}
                 <li><a role="button" href="{% url 'login' %}"><i class="bi-person"></i></i> Login</a></li>
                 {% endif %}
