@@ -7,10 +7,11 @@ from django.db import models
 class UserProfile(models.Model):
     USER_TYPE = [
         ("TEA", "Teacher"),
-        ("STU", "Student")
+        ("STU", "Student"),
+        ("ADM", "Admin")
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    website = models.URLField(max_length=256)
+    website = models.URLField(max_length=256,blank=True)
     type = models.CharField(max_length=3, choices=USER_TYPE)
     
 
