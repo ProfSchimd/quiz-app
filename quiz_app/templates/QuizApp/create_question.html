@@ -24,9 +24,9 @@
     <label>
         Question type:
         <select id="q_type" name="q_type" onchange="typeSelect()">
-            <option>Invertible</option>
-            <option>Single</option>
-            <option>Multiple</option>
+            {% for type in types %}
+                <option value="{{ type.0 }}">{{ type.1 }}</option>
+            {% endfor %}
         </select>
     </label>
 
@@ -45,6 +45,16 @@
         <a class="bi-plus-circle-fill success" onclick="addOption()"></a>
     </div>
 
+    <label>
+        Subject:
+        <select id="q_subject" name="q_subject">
+            <option vale="">-</option>
+            {% for subject in subjects %}
+                <option value="{{ subject.0 }}">{{ subject.1 }} ({{ subject.0 }})</option>
+            {% endfor %}
+        </select>
+    </label>
+
     <label for="inputTag">Tags</label>
     <div class="grid">
         <input id="inputTag" type="text" placeholder="Add a tag">
@@ -62,8 +72,12 @@
     var tagList = [];
     function typeSelect(e) {
         var typeSelected = document.getElementById("q_type").value;
-        document.getElementById("textInverted").disabled = (typeSelected !== "Invertible");
-        if (typeSelected === "Single") {
+        if (typeSelected === "FILL") {
+            alert("Fill not yet supported!");
+            return;
+        }
+        document.getElementById("textInverted").disabled = (typeSelected !== "INVERTIBLE");
+        if (typeSelected === "SINGLE") {
             const checkboxes = document.querySelector("#optionsList").querySelectorAll("input[type='checkbox']")
             var count = 0
             checkboxes.forEach(c => count = count + (c.checked ? 1 : 0));

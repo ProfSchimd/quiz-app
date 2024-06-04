@@ -31,7 +31,7 @@ def trim_common_suffix(a: str, b: str, ignore_case: bool=False) -> tuple(str, st
     Returns:
         tuple(str,str): The trimmed strings.
     """
-    (t1, t2) = trim_common_prefix(a[-1::-1], b[-1::-1], ignore_case=False)
+    (t1, t2) = trim_common_prefix(a[-1::-1], b[-1::-1], ignore_case=ignore_case)
     return (t1[-1::-1], t2[-1::-1])
 
 

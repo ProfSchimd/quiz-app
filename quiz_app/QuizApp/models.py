@@ -87,6 +87,22 @@ class Question(models.Model):
             "tags": [t.name for t in self.tags.all()]
         }
     
+    @staticmethod
+    def add_or_update(type, weight, subject, tags, text_and_key, creator, update_tags=True, id=None):
+        qModel = Question(
+            question_type=type.upper(),
+            weight=weight,
+            subject=subject,
+            creator=creator,
+            text_and_keys=text_and_key,
+        )
+        qModel.save()
+        if tags and update_tags:
+            for tag in tags:
+                tag, _ = Tag.objects.get_or_create(name__iexact=tag, defaults={"name": tag})
+                qModel.tags.add(tag)
+            qModel.save()
+    
     
 
 class Collection(models.Model):

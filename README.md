@@ -1,6 +1,21 @@
 # QuizApp
 A simple App to support teaching with instant quiz creation, share, and feedback.
 
+## Routes
+The following routes are fully or partially implemented
+* `/` Home page: still basic needs menu and summary information (or dashboard)
+* `/tag/new` Creates new tag needs 
+* `/subject/new`
+* `/question/show/<int>`
+* `/question/show`
+* `/question/export`
+* `/question/new`
+* `/question/upload`
+* `/question/upload/confirm`
+* `/collection/from_questions`
+* `/collection/<int>`
+
+
 ## Roadmap
 See [detailed plan below](#detailed-plan) for more information.
 

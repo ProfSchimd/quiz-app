@@ -9,6 +9,7 @@ from .rendering.latex_rendering import latex_render
 from .rendering.text_rendering import text_render
 from .rendering.html_rendering import html_render
 from .rendering.json_rendering import json_render
+from .rendering.gift_rendering import gift_render
 from .util import get_similarity_matrix
 
 
@@ -68,7 +69,8 @@ def render_quiz(quiz: list, template:str, text: str, solution: str, track_n: int
     extensions = {
         'latex': 'tex',
         'text': 'txt',
-        'html': 'html'
+        'html': 'html',
+        'gift': 'gift',
     }
     ext = extensions.get(render, '')
     text_path: str = os.path.join(destination, f'{text}.{ext}')
@@ -83,6 +85,8 @@ def render_quiz(quiz: list, template:str, text: str, solution: str, track_n: int
         html_render(quiz, template, text_path, solution_path, track_n)
     elif render.lower() == 'json':
         json_render(quiz, template, text_path, solution_path, track_n)
+    elif render.lower() == 'gift':
+        gift_render(quiz, template, text_path)
         
 def print_output(info: dict, verbosity: int):
     if verbosity == 0:
