@@ -1,3 +1,5 @@
+"use strict";
+
 window.addEventListener("load", function() {
     const allSelect = this.document.querySelector("#allSelector");
     allSelect.addEventListener('change', function() {
