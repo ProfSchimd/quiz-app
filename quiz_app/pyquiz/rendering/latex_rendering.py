@@ -1,5 +1,15 @@
 from .. import util
 
+# TODO: In order to add 'exam' class support we need to make some changes to the code.
+# - Add 'use_exam_class' flag that distinguished "standard" LaTeX and 'exam' class
+# - Template file for 'exam' class
+# - Switch from \section to \question using points
+# - Replace the multiple choice rendering: (i) itemize becomes (ii) use \choice and \CorrectChoice
+# - Replace fill rendering to use \fillin
+# - Implement solution with \printsolutions toggled
+# - Review the general layout of the resulting file
+# 
+
 fill_placeholder = ".................."
 
 
@@ -111,8 +121,11 @@ def latex_render_by_type(q):
         text, solution = latex_render_composite(q)
     return text, solution
 
+# Same as latex_render, but uses strings in place of files (template, text, and solution)
 
-def latex_render(questions: list, template_file: str, text_file: str, solution_file: str, track_n: str):
+def latex_render_strings(questions: list, template: str, track_n: str):
+    if template is None:
+        template = latex_template_raw
     text_content = ''
     solved_content = ''
     for i, q in enumerate(questions, 1):
@@ -121,6 +134,14 @@ def latex_render(questions: list, template_file: str, text_file: str, solution_f
         text, solution = latex_render_by_type(q)
         text_content += text
         solved_content += solution
+    out_text = template.replace('%%--CONTENT--%%', text_content).replace('%%--FOOTRIGHT--%%', f'T:{track_n}')
+    out_solution = template.replace('%%--CONTENT--%%', solved_content).replace('%%--FOOTRIGHT--%%', f'T:{track_n}')
+    
+    return (out_text, out_solution)
+
+
+def latex_render(questions: list, template_file: str, text_file: str, solution_file: str, track_n: str):
+    text_content, solved_content = latex_render_strings(questions, open(template_file).read(), track_n)
 
     # Text output
     out = open(template_file).read()
@@ -134,3 +155,49 @@ def latex_render(questions: list, template_file: str, text_file: str, solution_f
     out = out.replace('%%--FOOTRIGHT--%%', f'T:{track_n}')
     open(solution_file, 'w').write(out)
 
+
+
+latex_template_raw = r"""
+\documentclass{article}
+% \documentclass{exam}
+\usepackage[a4paper, total={7in, 8.5in}]{geometry}
+\usepackage[utf8]{inputenc}
+% Uncomment for Verdana font
+% \usepackage{DejaVuSansCondensed}
+% \renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{fancyhdr}
+\renewcommand{\headrulewidth}{0pt}
+
+% Uncomment \usepackage below for the page background pattern (to help students)
+% Patterns: std, dot ruled
+% Colorsets: std, ghostly
+% \usepackage[pattern=dot, colorset=ghostly, textarea]{gridpapers}
+
+\title{Quiz}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhf[HC]{
+    \begin{tabular}{|m{3.5in}|m{1.25in}|m{1.75in}|}
+    \hline 
+    &&\\[-9pt]
+    Cognome e Nome & Classe  & Data\\[3pt]
+    \hline
+    \end{tabular}
+}
+\fancyhf[FR]{
+    %%--FOOTRIGHT--%%
+}
+
+%%--CONTENT--%%
+
+% \fillwithdottedlines{\stretch{1}}
+% \pagebreak
+% \fillwithdottedlines{\stretch{1}}
+
+\end{document}
+"""

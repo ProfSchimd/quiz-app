@@ -1,18 +1,18 @@
 import json
 import random
-from typing import Any
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
-from django.forms.models import BaseModelForm
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic.edit import CreateView
 
+from pyquiz.pyquiz import parse_question_json, create_quiz
+from pyquiz.rendering.latex_rendering import latex_render_strings
+
 from .forms import QuestionForm, UploadFileForm
 from .models import Collection, Question, Subject, Tag
 
-from pyquiz.pyquiz import parse_question_json, create_quiz
 
 # Views implemented with Django helpers
 class CreateTagView(PermissionRequiredMixin, CreateView):
@@ -91,23 +91,48 @@ def question_list(request):
 
 def question_export(request):
     if request.method == "POST":
-        # question_ids = [key.split("_")[1] for key in request.POST if key.startswith("id_")]
-        # questions = Question.objects.filter(pk__in=question_ids)
         questions = questions_from_post(request.POST)
+        format = request.POST.get("format")
         response = HttpResponse(
             content_type="application/json",
             headers={"Content-Disposition": 'attachment; filename="export.json"'},
         )
         jsonQuestions = [q.to_json() for q in questions]
+        # If Raw JSON is selected, the raw questions (non-random) are exported
+        if not format or format == "raw-json":
+            response = HttpResponse(
+                content_type="application/json",
+                headers={"Content-Disposition": 'attachment; filename="export.json"'},
+            )
+            json.dump(jsonQuestions, response, ensure_ascii=False, indent=4)
+            return response
+        
+        # Otherwise renders selected (possibly randomized) questions
+        
         if request.POST.get("random"):
             seed = request.POST.get("seed")
             random.seed(seed)
             
-            jsonQuestions = create_quiz(parse_question_json(jsonQuestions), len(questions))
-            jsonQuestions = [q.to_dict() for q in jsonQuestions]
-        json.dump(jsonQuestions, response, ensure_ascii=False, indent=4)
+        jsonQuestions = create_quiz(parse_question_json(jsonQuestions), len(questions))
+            
+        
+        if format == "latex":
+            text, _ = latex_render_strings(jsonQuestions, None, 1)
+            response = HttpResponse(
+                content=text,
+                content_type="text/x-tex",
+                headers={"Content-Disposition": 'attachment; filename="quiz.tex"'},
+            )
+            return response
+            
+        # If we reach this point, we don't support the selected format. This can be an
+        # error or the support is under development.
+        response = HttpResponse(
+            content_type="application/json",
+            headers={"Content-Disposition": 'attachment; filename="error.json"'},
+        )
+        json.dump({"Error": f"Unsupported export format: {format}"}, response, ensure_ascii=False, indent=4)
         return response
-    return redirect("question_show")
 
 def question_create(request):
     if request.method == "POST":

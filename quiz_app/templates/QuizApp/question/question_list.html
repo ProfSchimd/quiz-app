@@ -2,16 +2,17 @@
 {% load static %}
 {% block extra_scripts %}
 <script src="{% static '/js/question_filter.js' %}"></script>
+<script src="{% static '/js/question_show.js' %}"></script>
 {% endblock %}
 {% block content %}
 <h1>Questions</h1>
 <form method="post">
     {% csrf_token %}
-    
+
     {% block question_list %}
-        {% include "QuizApp/question/question_list_as_table.html" %}
+    {% include "QuizApp/question/question_list_as_table.html" %}
     {% endblock %}
-    
+
     <fieldset>
         <div class="grid">
             <label for="randomCheck">
@@ -22,9 +23,24 @@
                 Seed
                 <input id="randomSeed" name="seed" type="text" placeholder="Random seed" disabled required>
             </label>
-         </div>
-        <button formaction={% url 'question_export' %} class="bi bi-download" role="button"> JSON</button>
-        <button formaction={% url 'collection_from_questions' %} class="bi bi-save"> Save</button>
+        </div>
+        <!-- <input type="hidden" name="format" id="formatField" value="json"> -->
+        <label for="formatSelector">
+            Select export format
+            <select name="format" id="formatSelector">
+                <option value="raw-json">Raw JSON (non random)</option>
+                <option value="latex">LaTeX</option>
+                <option value="latex-exam">LaTeX (Exam class)</option>
+                <option value="html">HTML</option>
+                <option value="text">Text</option>
+                <option value="markdown">Markdown</option>
+                <option value="moodle">Moodle</option>
+            </select>
+
+        </label>
+
+        <button id="exportButton" formaction={% url 'question_export' %} class="bi bi-download" role="button"> Export Raw JSON</button>
+        <button formaction={% url 'collection_from_questions' %} class="bi bi-save"> Save Collection</button>
     </fieldset>
 </form>
 {% endblock %}
