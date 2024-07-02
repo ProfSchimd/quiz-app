@@ -93,7 +93,9 @@ def html_render_by_type(q):
     return text, solution
 
 
-def html_render(questions, template_file, text_file, solution_file, track_n):
+def html_render_strings(questions: list, template: str, track_n: str):
+    if template is None:
+        template = html_template_raw
     text_content = ''
     solved_content = ''
     i = 1
@@ -104,17 +106,74 @@ def html_render(questions, template_file, text_file, solution_file, track_n):
         text_content += text
         solved_content += solution
         i += 1
+        
+    out_text = template.replace("{% CONTENT %}", text_content).replace("{% FOOTRIGHT %}", f"T:{track_n}")
+    out_solution = template.replace("{% CONTENT %}", solved_content).replace("{% FOOTRIGHT %}", f"T:{track_n}")
+    
+    return (out_text, out_solution)
+
+
+def html_render(questions, template_file, text_file, solution_file, track_n):
+
+    text_content, solved_content = html_render_strings(questions, open(template_file).read(), track_n)
 
     # Text output
-    out = open(template_file).read()
-    out = out.replace('{% CONTENT %}', text_content)
-    # out = out.replace('%%--FOOTRIGHT--%%', f'T:{track_n}')
-    open(text_file, 'w').write(out)
-
+    open(text_file, 'w').write(text_content)
     # Solution output
-    out = open(template_file).read()
-    out = out.replace('{% CONTENT %}', solved_content)
-    # out = out.replace('%%--FOOTRIGHT--%%', f'T:{track_n}')
-    open(solution_file, 'w').write(out)
+    open(solution_file, 'w').write(solved_content)
 
 
+html_template_raw = r"""
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Verifica</title>
+        <style>
+        @media only screen {
+            body {
+                color: #333333;
+                text-align: justify;
+                line-height: 1.5rem;
+                margin-top: 40px;
+                margin-left: 8%;
+                margin-right: 8%;
+                font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            }
+            code {
+                background-color: #EEEEEE;
+                color: #555577;
+                padding: 3px;
+                border-radius: 4px;
+            }
+            h2 {
+                font-size: 1.8rem;
+                margin-top: 30px;
+                margin-bottom: 10px;
+            }
+            h3 {
+                font-size: 1.3rem;
+                margin-top: 1.5rem;
+                margin-bottom: 0.3rem;
+            }
+            ol {
+                margin-right: 30px;
+                
+            }
+            ol li {
+                margin-top: 5px;
+                margin-bottom: 10px;
+                margin-left: 15px;
+                margin-right: 50px;
+            }
+            p.option {
+                padding-bottom: 1px;
+                padding-left: 30px;
+            }
+        }
+        </style>
+    </head>
+    <body>
+        {% CONTENT %}
+    </body>
+</html>"""

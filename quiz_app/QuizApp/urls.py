@@ -23,5 +23,7 @@ urlpatterns = [
     path("collection/<int:pk>", DetailView.as_view(model=Collection, template_name="QuizApp/collection/collection_detail.html")),
     
     path("", views.index, name="index"),
+    
+    path("test", views.test_view, name="test_page")
    
 ]

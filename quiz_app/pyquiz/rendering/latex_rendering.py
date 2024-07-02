@@ -144,16 +144,9 @@ def latex_render(questions: list, template_file: str, text_file: str, solution_f
     text_content, solved_content = latex_render_strings(questions, open(template_file).read(), track_n)
 
     # Text output
-    out = open(template_file).read()
-    out = out.replace('%%--CONTENT--%%', text_content)
-    out = out.replace('%%--FOOTRIGHT--%%', f'T:{track_n}')
-    open(text_file, 'w').write(out)
-
+    open(text_file, 'w').write(text_content)
     # Solution output
-    out = open(template_file).read()
-    out = out.replace('%%--CONTENT--%%', solved_content)
-    out = out.replace('%%--FOOTRIGHT--%%', f'T:{track_n}')
-    open(solution_file, 'w').write(out)
+    open(solution_file, 'w').write(solved_content)
 
 
 

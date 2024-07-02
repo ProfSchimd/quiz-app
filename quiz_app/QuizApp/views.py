@@ -1,5 +1,7 @@
+import io
 import json
 import random
+import zipfile
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Q
@@ -9,6 +11,7 @@ from django.views.generic.edit import CreateView
 
 from pyquiz.pyquiz import parse_question_json, create_quiz
 from pyquiz.rendering.latex_rendering import latex_render_strings
+from pyquiz.rendering.html_rendering import html_render_strings
 
 from .forms import QuestionForm, UploadFileForm
 from .models import Collection, Question, Subject, Tag
@@ -124,6 +127,15 @@ def question_export(request):
                 headers={"Content-Disposition": 'attachment; filename="quiz.tex"'},
             )
             return response
+        
+        if format == "html":
+            text, _ = html_render_strings(jsonQuestions, None, 1)
+            response = HttpResponse(
+                content=text,
+                content_type="text/html",
+                headers={"Content-Disposition": 'attachment; filename="quiz.html"'},
+            )
+            return response
             
         # If we reach this point, we don't support the selected format. This can be an
         # error or the support is under development.
@@ -224,3 +236,17 @@ def questions_from_post(post):
     question_ids = [key.split("_")[1] for key in post if key.startswith("id_")]
     questions = Question.objects.filter(pk__in=question_ids)
     return questions
+
+def test_view(request):
+    # Current test: return zip file, with multiple files create in memory
+    
+    buffer = io.BytesIO()
+    z_file = zipfile.ZipFile(buffer, 'w')
+    z_file.writestr("a.txt", "a")
+    z_file.writestr("/more/aa.txt", "a aa")
+    z_file.close()
+    response = HttpResponse(buffer.getvalue())
+    response['Content-Type'] = 'application/x-zip-compressed'
+    response['Content-Disposition'] = 'attachment; filename=files.zip'
+    return response
+

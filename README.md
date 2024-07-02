@@ -12,7 +12,7 @@ The following routes are fully or partially implemented
 * `/question/new`
 * `/question/upload`
 * `/question/upload/confirm`
-* `/collection/from_questions`
+* `/collection/from_questions` creates a new collection using the list of passed questions
 * `/collection/<int>`
 
 
