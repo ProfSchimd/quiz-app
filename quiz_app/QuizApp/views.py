@@ -119,8 +119,8 @@ def question_export(request):
         jsonQuestions = create_quiz(parse_question_json(jsonQuestions), len(questions))
             
         
-        if format == "latex":
-            text, _ = latex_render_strings(jsonQuestions, None, 1)
+        if format == "latex" or format == "latex-exam":
+            text, _ = latex_render_strings(jsonQuestions, None, 1, use_exam_class=(format=="latex-exam"))
             response = HttpResponse(
                 content=text,
                 content_type="text/x-tex",

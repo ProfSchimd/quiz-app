@@ -68,6 +68,7 @@ def create_quiz(questions: list, count: int, shuffle: bool=True) -> list:
 def render_quiz(quiz: list, template:str, text: str, solution: str, track_n: int, render: str, destination: str):
     extensions = {
         'latex': 'tex',
+        'latex-exam': 'exam.tex',
         'text': 'txt',
         'html': 'html',
         'gift': 'gift',
@@ -79,6 +80,8 @@ def render_quiz(quiz: list, template:str, text: str, solution: str, track_n: int
     
     if render.lower() == 'latex':
         latex_render(quiz, template, text_path, solution_path, track_n)
+    elif render.lower() == 'latex-exam':
+        latex_render(quiz, template, text_path, solution_path, track_n, True)
     elif render.lower() == 'text':
         text_render(quiz, template, text_path, solution_path, track_n)
     elif render.lower() == 'html':

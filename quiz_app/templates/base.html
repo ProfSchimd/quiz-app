@@ -22,11 +22,12 @@
                 <li><a role="button" href="{% url 'index' %}">Home</a></li>
             </ul>
             <ul>
+                {% block nav_menu %}
+                    <li><a role="button" href="{% url 'question_list' %}">Questions</a></li>
+                {% endblock %}
                 {% if user.is_authenticated %}
-                
-
                     <li>
-                        <form method="post" action="{% url 'logout' %}">
+                        <form style="margin-bottom: 0" method="post" action="{% url 'logout' %}">
                             {% csrf_token %}
                             <button role="button" type="submit"><i class="bi-box-arrow-right"></i> {{ user.username }}</button>
                         </form>
