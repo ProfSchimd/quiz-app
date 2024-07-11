@@ -59,8 +59,12 @@ class CreateCollectionView(PermissionRequiredMixin, CreateView):
 
 # Views requiring custom logic (w.r.t. Django helpers)
 def index(request):
-    print(type(request.user.get_group_permissions()))
+    # print(type(request.user.get_group_permissions()))
     return render(template_name="QuizApp/index.html", context={}, request=request)
+
+
+def subject_all(request):
+    return render(template_name="QuizApp/subject/subject_all.html", context={}, request=request)
 
 
 def question_show(request, q_id=0):
@@ -155,7 +159,7 @@ def question_create(request):
         "types": Question.QUESTION_TYPE,
         "subjects": [(s.short_name, s.name) for s in all_subjects],
         }
-    return render(template_name="QuizApp/create_question.html", context=context, request=request)
+    return render(template_name="QuizApp/question/question_create.html", context=context, request=request)
 
 # TODO: This can be transformed into a form view
 def question_upload(request):        
@@ -232,11 +236,6 @@ def question_upload_confirm(request):
 def collection_from_questions(request):
     return redirect("index")
 
-def questions_from_post(post):
-    question_ids = [key.split("_")[1] for key in post if key.startswith("id_")]
-    questions = Question.objects.filter(pk__in=question_ids)
-    return questions
-
 def test_view(request):
     # Current test: return zip file, with multiple files create in memory
     
@@ -250,3 +249,13 @@ def test_view(request):
     response['Content-Disposition'] = 'attachment; filename=files.zip'
     return response
 
+
+def collection_all(request):
+    return render(template_name="QuizApp/collection/collection_list.html", context={}, request=request)
+
+
+# utility functions (i.e., not actual views)
+def questions_from_post(post):
+    question_ids = [key.split("_")[1] for key in post if key.startswith("id_")]
+    questions = Question.objects.filter(pk__in=question_ids)
+    return questions
