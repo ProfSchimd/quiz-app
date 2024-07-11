@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_scripts %}
+<script src="{% static '/js/question_fill.js' %}"></script>
+{% endblock %}
+{% block content %}
+<input id="inputArea" type="textarea">
+<ul id="solutionList">
+
+</ul>
+{% endblock %}

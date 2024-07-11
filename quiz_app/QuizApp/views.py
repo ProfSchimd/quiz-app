@@ -236,19 +236,6 @@ def question_upload_confirm(request):
 def collection_from_questions(request):
     return redirect("index")
 
-def test_view(request):
-    # Current test: return zip file, with multiple files create in memory
-    
-    buffer = io.BytesIO()
-    z_file = zipfile.ZipFile(buffer, 'w')
-    z_file.writestr("a.txt", "a")
-    z_file.writestr("/more/aa.txt", "a aa")
-    z_file.close()
-    response = HttpResponse(buffer.getvalue())
-    response['Content-Type'] = 'application/x-zip-compressed'
-    response['Content-Disposition'] = 'attachment; filename=files.zip'
-    return response
-
 
 def collection_all(request):
     return render(template_name="QuizApp/collection/collection_list.html", context={}, request=request)
@@ -259,3 +246,20 @@ def questions_from_post(post):
     question_ids = [key.split("_")[1] for key in post if key.startswith("id_")]
     questions = Question.objects.filter(pk__in=question_ids)
     return questions
+
+
+## PROTOTYPING NEXT
+def test_view(request):
+    # Current test: prototype of fill in questions creation
+    return render(template_name="test.html", context={}, request=request)
+    
+    # Return zip file, with multiple files create in memory
+    # buffer = io.BytesIO()
+    # z_file = zipfile.ZipFile(buffer, 'w')
+    # z_file.writestr("a.txt", "a")
+    # z_file.writestr("/more/aa.txt", "a aa")
+    # z_file.close()
+    # response = HttpResponse(buffer.getvalue())
+    # response['Content-Type'] = 'application/x-zip-compressed'
+    # response['Content-Disposition'] = 'attachment; filename=files.zip'
+    # return response
