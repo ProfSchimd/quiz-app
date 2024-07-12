@@ -5,7 +5,7 @@
 <script src="{% static '/js/question_show.js' %}"></script>
 {% endblock %}
 {% block content %}
-<h1>Questions</h1>
+<h1 class="text-3xl">Questions</h1>
 <form method="post">
     {% csrf_token %}
 
@@ -14,15 +14,23 @@
     {% endblock %}
 
     <fieldset>
-        <div class="grid">
-            <label for="randomCheck">
+        <div class="py-2 flex items-center space-x-4">
+            <!-- <div class="flex items-center">
+                <div class="w-1/2 flex items-center">
+                    <input id="remember-me" type="checkbox" class="mt-1 mr-2" />
+                    <label for="remember-me">Remember me!</label>
+                </div>
+                <button class="ml-auto w-1/2 bg-gray-800 text-white p-2 rounded font-semibold hover:bg-gray-900" type="submit">Log In</button>
+            </div> -->
+
+            <div>
                 <input id="randomCheck" name="random" type="checkbox" role="switch">
-                Random
-            </label>
-            <label for="randomSeed">
-                Seed
+                <label for="randomCheck">Random</label>
+            </div>
+            <div>
+                <label for="randomSeed">Seed</label>
                 <input id="randomSeed" name="seed" type="text" placeholder="Random seed" disabled required>
-            </label>
+            </div>
         </div>
         <!-- <input type="hidden" name="format" id="formatField" value="json"> -->
         <label for="formatSelector">
@@ -39,8 +47,8 @@
 
         </label>
 
-        <button id="exportButton" formaction={% url 'question_export' %} class="bi bi-download" role="button"> Export Raw JSON</button>
-        <button formaction={% url 'collection_from_questions' %} class="bi bi-save"> Save Collection</button>
+        <button class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 a:ring-cyan-200 font-medium rounded-lg text-sm mx-1 p-3 text-center" id="exportButton" formaction={% url 'question_export' %} class="bi bi-download" role="button"> Export Raw JSON</button>
+        <button class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 a:ring-cyan-200 font-medium rounded-lg text-sm mx-1 p-3 text-center" formaction={% url 'collection_from_questions' %} class="bi bi-save"> Save Collection</button>
     </fieldset>
 </form>
 {% endblock %}
