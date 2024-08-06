@@ -150,16 +150,33 @@ def question_export(request):
         json.dump({"Error": f"Unsupported export format: {format}"}, response, ensure_ascii=False, indent=4)
         return response
 
-def question_create(request):
+def question_add(request):
+    message = None
     if request.method == "POST":
-        # TODO: Process request of "Question Creation" view
         print(request.POST)
+        subject = None
+        if request.POST.get("q_subject") != "-":
+            subject=Subject.objects.get(short_name=request.POST.get("q_subject"))
+        if request.POST.get("q_type") == "FILL":
+            text_and_key = fill_from_post(request.POST)
+        else:
+            text_and_key = choices_from_post(request.POST)
+        Question.add_or_update(
+            type = request.POST.get("q_type"),
+            weight = 1,
+            subject = subject,
+            tags = tags_from_post(request.POST),
+            text_and_key = text_and_key,
+            creator = request.user if request.user.is_authenticated else None,
+        )
+        
     all_subjects = Subject.objects.all()
     context = {
         "types": Question.QUESTION_TYPE,
         "subjects": [(s.short_name, s.name) for s in all_subjects],
+        "message": message,
         }
-    return render(template_name="QuizApp/question/question_create.html", context=context, request=request)
+    return render(template_name="QuizApp/question/question_add.html", context=context, request=request)
 
 # TODO: This can be transformed into a form view
 def question_upload(request):        
@@ -247,6 +264,50 @@ def questions_from_post(post):
     questions = Question.objects.filter(pk__in=question_ids)
     return questions
 
+
+def tags_from_post(post):
+    return [post.get(tag) for tag in post if tag.startswith("tag_")]
+    
+
+
+def fill_from_post(post):
+    """Constructs the text_and_key field from the POST dictionary, checking correct values"""
+    text = post.get("fillText")
+    to_fill = post.get("fillQuestion")
+    placeholders = sorted([int(p.split("_")[1]) for p in post if p.startswith("inputKey_")])
+    correct = [""] * len(placeholders)
+    for p in placeholders:
+        correct[p] = post.get(f"inputKey_{p}")
+    # TODO: check consistency (#placeholders VS to_fill)
+    return {
+        "text": text,
+        "tofill": to_fill,
+        "correct": correct,
+    }
+    
+
+def choices_from_post(post):
+    """Constructs the text_and_key field from the POST dictionary, checking correct values"""
+    if post.get("q_type") == "INVERTIBLE":
+        text = [
+            post.get("textNormal"),
+            post.get("textInverted")
+        ]
+    else:
+        text = post.get("textNormal")
+    
+    options = [post.get(o) for o in post if o.startswith("t_")]
+    correct = [0] * len(options)
+    for i, _ in enumerate(options):
+        correct[i] = 1 if post.get(f"c_{i}") else 0
+    if sum(correct) > 1 and post.get("q_type") == "SINGLE":
+        raise ValueError("Single must have one only correct answer")
+    return {
+        "text": text,
+        "options": options,
+        "correct": correct,
+    }
+    
 
 ## PROTOTYPING NEXT
 def test_view(request):

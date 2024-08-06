@@ -16,7 +16,7 @@ urlpatterns = [
     path("question/show/<int:q_id>", views.question_show, name="question_show"),
     path("question/list", login_required(views.question_list), name="question_list"),
     path("question/export", views.question_export, name="question_export"),
-    path("question/add",  views.question_create, name="question_add"),
+    path("question/add",  views.question_add, name="question_add"),
     path("question/upload", views.question_upload, name="question_upload"),
     path("question/upload/confirm", views.question_upload_confirm, name="question_upload_confirm"),
     
