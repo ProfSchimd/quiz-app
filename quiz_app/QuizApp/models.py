@@ -64,11 +64,13 @@ class Question(models.Model):
     tags = models.ManyToManyField(Tag, blank=True)
     
     def get_display_text(self, separator=" ", positive_pre="(+)", negative_pre="(-)"):
+        if self.text_and_keys is None or self.text_and_keys == "":
+            return "-- Empty Question --"
         if self.question_type == "INVERTIBLE":
             return f"{positive_pre} {self.text_and_keys['text'][0]}{separator}{negative_pre} {self.text_and_keys['text'][1]}"
         elif self.question_type == "FILL":
-            return self.text_and_keys["tofill"]
-        return self.text_and_keys["text"]
+            return self.text_and_keys.get("tofill")
+        return self.text_and_keys.get("text")
     
     def get_html_display_text(self):
         return self.get_display_text(separator="<br>")

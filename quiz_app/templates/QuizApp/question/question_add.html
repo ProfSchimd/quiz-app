@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_scripts %}
+<script src="{% static '/js/question_add.js' %}"></script>
+{% endblock %}
+{% block content %}
+<article>
+<header>
+    <hgroup>    
+        <h1>Create choice question</h1>
+        <h2>Provide name and description</h2>
+        
+    </hgroup>
+</header>
+{% if message %}
+<p>Info: {{message}}</p>
+{% endif %}
+<details>
+    <summary>Choose between: <i>Single, Multiple, Invertible, or Fill type.</i></summary>
+    <p>
+        <ul>
+            <li><b>Single</b>: One text and one single correct answer.</li>
+            <li><b>Multiple</b>: One text and one or more correct answers.</li>
+            <li><b>Invertible</b>: Two text with multiple answers, the answers are inverted if the second text is displayed</li>
+        </ul>
+    </p>
+  </details>
+<form id="jsonForm" method="POST" >
+    {% csrf_token %} <!-- Include this line if you are using Django's CSRF protection -->
+
+    <label>
+        Question type:
+        <select id="q_type" name="q_type">
+            {% for type in types %}
+                <option value="{{ type.0 }}">{{ type.1 }}</option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <!-- Separate text inputs for "Normal" and "Inverted" -->
+    <div id="choiceForm">
+        <label id="textLabel" for="textNormal">Text (write your question):</label>
+        <textarea id="textNormal" name="textNormal" rows="1"></textarea>
+
+        <label for="textInverted">Inverted Text (correct solution is inverted):</label>
+        <textarea id="textInverted" name="textInverted" rows="1"></textarea>
+
+        <label for="options">Options (select corrects for normal):</label>
+        <div id="optionsList">
+            
+        </div>
+        <div id="addOptionsDiv" class="grid">
+            <a class="bi-plus-circle-fill success" onclick="addOption()"></a>
+        </div>
+    </div>
+    <div id="fillForm">
+        <label for="fillText">Directions</label>
+        <textarea id="fillText" name="fillText" rows="1"></textarea>
+
+        <label for="fillQuestion">Write filling question (use {% verbatim %}{{n}}{% endverbatim %} for the n-th blank)</label>
+        <textarea id="fillQuestion" name="fillQuestion" placeholder="France capital is  {% verbatim %}{{0}}{% endverbatim %}"></textarea>
+
+        <div id="keysList">
+
+        </div>
+    </div>
+
+    <label>
+        Subject:
+        <select id="q_subject" name="q_subject">
+            <option vale="">-</option>
+            {% for subject in subjects %}
+                <option value="{{ subject.0 }}">{{ subject.1 }} ({{ subject.0 }})</option>
+            {% endfor %}
+        </select>
+    </label>
+
+    <label for="inputTag">Tags</label>
+    <div class="grid">
+        <input id="inputTag" type="text" placeholder="Add a tag">
+        <a class="bi-plus-circle-fill" onclick="addTag()"></a>
+    </div>
+    <div id="tagList">
+
+    </div>
+    <div>
+        <input type="submit" value="Submit">
+    </div>
+</form>
+</article>
+{% endblock %}
