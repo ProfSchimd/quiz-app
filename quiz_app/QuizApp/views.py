@@ -22,7 +22,7 @@ class CreateTagView(PermissionRequiredMixin, CreateView):
     permission_required = "QuizApp.add_tag"
     model = Tag
     fields = ["name", "description"]
-    template_name="QuizApp/create_tag.html"
+    template_name="QuizApp/tag_add.html"
     success_url = "/quizapp"
     
 
@@ -30,7 +30,7 @@ class CreateSubjectView(PermissionRequiredMixin, CreateView):
     permission_required = "QuizApp.add_subject"
     model = Subject
     fields =["name", "short_name", "description"]
-    template_name = "QuizApp/create_subject.html"
+    template_name = "QuizApp/subject_add.html"
     success_url = "/quizapp"
     
 class CreateCollectionView(PermissionRequiredMixin, CreateView):
@@ -64,7 +64,21 @@ def index(request):
 
 
 def subject_all(request):
-    return render(template_name="QuizApp/subject/subject_all.html", context={}, request=request)
+    subjects = Subject.objects.all()
+    context = {
+        "subjects": []
+    }
+    for subject in subjects:
+        len(Question.objects.filter(subject=subject))
+        s = {
+            "name": subject.name,
+            "short_name": subject.short_name,
+            "question_count": len(Question.objects.filter(subject=subject)),
+            "collection_count": len(Collection.objects.filter(subject=subject)),
+        }
+        context["subjects"].append(s)
+    
+    return render(template_name="QuizApp/subject/subject_all.html", context=context, request=request)
 
 
 def question_show(request, q_id=0):

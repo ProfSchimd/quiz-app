@@ -15,27 +15,19 @@
 
     <fieldset>
         <div class="py-2 flex items-center space-x-4">
-            <!-- <div class="flex items-center">
-                <div class="w-1/2 flex items-center">
-                    <input id="remember-me" type="checkbox" class="mt-1 mr-2" />
-                    <label for="remember-me">Remember me!</label>
-                </div>
-                <button class="ml-auto w-1/2 bg-gray-800 text-white p-2 rounded font-semibold hover:bg-gray-900" type="submit">Log In</button>
-            </div> -->
 
             <div>
                 <input id="randomCheck" name="random" type="checkbox" role="switch">
                 <label for="randomCheck">Random</label>
             </div>
             <div>
-                <label for="randomSeed">Seed</label>
-                <input id="randomSeed" name="seed" type="text" placeholder="Random seed" disabled required>
+                <!-- <label for="randomSeed">Seed</label> -->
+                <input class="text-black dark:text-black bg-white dark:bg-slate-300" id="randomSeed" name="seed" type="text" placeholder="Random seed" disabled required>
             </div>
         </div>
-        <!-- <input type="hidden" name="format" id="formatField" value="json"> -->
         <label for="formatSelector">
             Select export format
-            <select name="format" id="formatSelector">
+            <select class="text-black dark:text-black bg-white dark:bg-slate-300" name="format" id="formatSelector">
                 <option value="raw-json">Raw JSON (non random)</option>
                 <option value="latex">LaTeX</option>
                 <option value="latex-exam">LaTeX (Exam class)</option>

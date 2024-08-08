@@ -67,11 +67,12 @@ function showTags() {
         const tagP = document.createElement("a");
         tagP.setAttribute("href", "");
         tagP.setAttribute("role", "button");
+        tagP.classList.add("bg-gray-300", "p-2", "text-gray-500", "hover:bg-gray-400", "rounded-lg");
         tagP.addEventListener("click", e => {
             e.preventDefault();
             removeTag(tag);
         });
-        tagP.textContent = tag;
+        tagP.textContent = `#${tag}`;
         tagDiv.appendChild(tagP);
         const tagIn = document.createElement("input");
         tagIn.setAttribute("type", "hidden");
@@ -114,6 +115,7 @@ function updateKeys(text) {
         inputKey.id = `inputKey_${i}`;
         inputKey.name = `inputKey_${i}`;
         inputKey.value = keys[i] || "";
+        inputKey.classList.add("w-full", "text-black", "dark:text-black", "bg-white", "dark:bg-slate-300");
         inputKey.addEventListener("change", e => keys[i]=e.target.value);
 
         const key = document.createElement("p");
@@ -133,6 +135,16 @@ function textInput(e) {
 window.addEventListener("load", function() {
     const typeSelector = document.querySelector("#q_type");
     typeSelector.addEventListener("click", typeSelect);
+    const inputTag = document.querySelector("#inputTag");
+    inputTag.addEventListener("keydown", function(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            if (e.target.value) {
+                addTag();
+                e.target.value = ""
+            }
+        }
+    })
     document.querySelector("#fillQuestion").addEventListener("input", textInput);
     typeSelect(undefined);
     updateKeys(document.querySelector("#fillQuestion").value);

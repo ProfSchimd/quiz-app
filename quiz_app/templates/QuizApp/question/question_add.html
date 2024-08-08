@@ -5,87 +5,102 @@
 {% endblock %}
 {% block content %}
 <article>
-<header>
-    <hgroup>    
-        <h1>Create choice question</h1>
-        <h2>Provide name and description</h2>
-        
-    </hgroup>
-</header>
-{% if message %}
-<p>Info: {{message}}</p>
-{% endif %}
-<details>
-    <summary>Choose between: <i>Single, Multiple, Invertible, or Fill type.</i></summary>
-    <p>
-        <ul>
-            <li><b>Single</b>: One text and one single correct answer.</li>
-            <li><b>Multiple</b>: One text and one or more correct answers.</li>
-            <li><b>Invertible</b>: Two text with multiple answers, the answers are inverted if the second text is displayed</li>
-        </ul>
-    </p>
-  </details>
-<form id="jsonForm" method="POST" >
-    {% csrf_token %} <!-- Include this line if you are using Django's CSRF protection -->
-
-    <label>
-        Question type:
-        <select id="q_type" name="q_type">
-            {% for type in types %}
-                <option value="{{ type.0 }}">{{ type.1 }}</option>
-            {% endfor %}
-        </select>
-    </label>
-
-    <!-- Separate text inputs for "Normal" and "Inverted" -->
-    <div id="choiceForm">
-        <label id="textLabel" for="textNormal">Text (write your question):</label>
-        <textarea id="textNormal" name="textNormal" rows="1"></textarea>
-
-        <label for="textInverted">Inverted Text (correct solution is inverted):</label>
-        <textarea id="textInverted" name="textInverted" rows="1"></textarea>
-
-        <label for="options">Options (select corrects for normal):</label>
-        <div id="optionsList">
-            
-        </div>
-        <div id="addOptionsDiv" class="grid">
-            <a class="bi-plus-circle-fill success" onclick="addOption()"></a>
-        </div>
+    <header>
+        <hgroup>
+            <h1 class="text-3xl">Create choice question</h1>
+            <h2 class="text-xl">Provide name and description</h2>
+        </hgroup>
+    </header>
+    {% if message %}
+    <p>Info: {{message}}</p>
+    {% endif %}
+    <div class="py-2">
+        <details>
+            <summary>Choose between: <i>Single, Multiple, Invertible, or Fill type.</i></summary>
+            <p>
+            <ul>
+                <li><b>Single</b>: One text and one single correct answer.</li>
+                <li><b>Multiple</b>: One text and one or more correct answers.</li>
+                <li><b>Invertible</b>: Two text with multiple answers, the answers are inverted if the second text is
+                    displayed</li>
+            </ul>
+            </p>
+        </details>
     </div>
-    <div id="fillForm">
-        <label for="fillText">Directions</label>
-        <textarea id="fillText" name="fillText" rows="1"></textarea>
+    <div class="bg-white dark:bg-slate-900 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <form id="jsonForm" method="POST">
 
-        <label for="fillQuestion">Write filling question (use {% verbatim %}{{n}}{% endverbatim %} for the n-th blank)</label>
-        <textarea id="fillQuestion" name="fillQuestion" placeholder="France capital is  {% verbatim %}{{0}}{% endverbatim %}"></textarea>
+            {% csrf_token %} <!-- Include this line if you are using Django's CSRF protection -->
+            <div class="py-4 grid gap-x-4 grid-cols-1 sm:grid-cols-4">
+                <div class="sm:grid-cols-1">
+                    <label>
+                        Question type:
+                        <select id="q_type" name="q_type" class="w-full text-black dark:text-black bg-white dark:bg-slate-300">
+                            {% for type in types %}
+                            <option value="{{ type.0 }}">{{ type.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
+            </div>
 
-        <div id="keysList">
+            <!-- Separate text inputs for "Normal" and "Inverted" -->
+            <div id="choiceForm" class="py-4 grid grid-cols-1 sm:grid-cols-4">
+                <label id="textLabel" for="textNormal">Text (write your question):</label>
+                <textarea id="textNormal" name="textNormal" rows="1"
+                    class="w-full text-black dark:text-black bg-white dark:bg-slate-300"></textarea>
+                <label for="textInverted">Inverted Text (correct solution is inverted):</label>
+                <textarea id="textInverted" name="textInverted" rows="1"
+                    class="w-full text-black dark:text-black bg-white dark:bg-slate-300"></textarea>
 
-        </div>
+                <label for="options">Options (select corrects for normal):</label>
+                <div id="optionsList">
+
+                </div>
+                <div id="addOptionsDiv" class="grid">
+                    <a class="bi-plus-circle-fill text-2xl text-green-700" onclick="addOption()"></a>
+                </div>
+            </div>
+            <div id="fillForm">
+                <label for="fillText">Directions</label>
+                <textarea id="fillText" name="fillText" rows="1" class="w-full text-black dark:text-black bg-white dark:bg-slate-300"></textarea>
+
+                <label for="fillQuestion">Write filling question (use {% verbatim %}{{n}}{% endverbatim %} for the n-th
+                    blank)</label>
+                <textarea id="fillQuestion" name="fillQuestion" class="w-full text-black dark:text-black bg-white dark:bg-slate-300"
+                    placeholder="France capital is  {% verbatim %}{{0}}{% endverbatim %}"></textarea>
+
+                <div id="keysList">
+
+                </div>
+            </div>
+
+            <div class="py-2">
+                <label>
+                    Subject:
+                    <select id="q_subject" name="q_subject" class="w-full text-black dark:text-black bg-white dark:bg-slate-300">
+                        <option value="">-</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject.0 }}">{{ subject.1 }} ({{ subject.0 }})</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div class="py-2">
+                <label for="inputTag">Tags</label>
+                <div class="flex">
+                    <input id="inputTag" class="w-full text-black dark:text-black bg-white dark:bg-slate-300" type="text" placeholder="Add a tag">
+                    <a class="ml-2 bi-plus-circle-fill text-green-600 text-3xl" onclick="addTag()"></a>
+                </div>
+                <div class="mt-4 mb-2" id="tagList">
+
+                </div>
+            </div>
+            <div>
+                <input type="submit" value="Submit" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+            </div>
     </div>
-
-    <label>
-        Subject:
-        <select id="q_subject" name="q_subject">
-            <option vale="">-</option>
-            {% for subject in subjects %}
-                <option value="{{ subject.0 }}">{{ subject.1 }} ({{ subject.0 }})</option>
-            {% endfor %}
-        </select>
-    </label>
-
-    <label for="inputTag">Tags</label>
-    <div class="grid">
-        <input id="inputTag" type="text" placeholder="Add a tag">
-        <a class="bi-plus-circle-fill" onclick="addTag()"></a>
+    </form>
     </div>
-    <div id="tagList">
-
-    </div>
-    <div>
-        <input type="submit" value="Submit">
-    </div>
-</form>
 </article>
 {% endblock %}
