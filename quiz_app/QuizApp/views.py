@@ -107,8 +107,17 @@ def question_list(request):
     subject = request.GET.get("subject")
     if subject:
         query &= Q(subject__short_name__iexact=subject)
+    subject_long = Subject.objects.get(short_name=subject) if subject else None
     questions = Question.objects.filter(query)
-    return render(template_name="QuizApp/question/question_list.html", context={"questions": questions}, request=request)
+    return render(
+        template_name="QuizApp/question/question_list.html",
+        context = {
+            "questions": questions,
+            "subject": subject_long,
+            "tags": tag_list,
+            },
+        request=request
+    )
 
 def question_export(request):
     if request.method == "POST":

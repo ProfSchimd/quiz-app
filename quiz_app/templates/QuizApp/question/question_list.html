@@ -6,6 +6,17 @@
 {% endblock %}
 {% block content %}
 <h1 class="text-3xl">Questions</h1>
+{% if subject %}
+<h3 class="text-xl">{{subject}}</h3>
+{% endif %}
+{% if tags %}
+<h4 class="text-large mt-1">
+{% for tag in tags %}
+<code class="text-sm bg-gray-300 p-2 text-gray-500 rounded-lg">#{{ tag }}</code>
+{% endfor %}
+</h4>
+{% endif %}
+
 <form method="post">
     {% csrf_token %}
 

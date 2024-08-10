@@ -1,9 +1,4 @@
 {% extends "base.html" %}
 {% block content %}
 <h1 class="text-3xl">Quiz App</h1>
-{% if user.is_authenticated %}
-<p>Hi {{ user.username }}! ({{ user.userprofile.get_type_display }})</p>
-<p>{{ user.groups }}</p>
-<p>{{ user.user_permissions }}</p>
-{% endif %}
 {% endblock %}
