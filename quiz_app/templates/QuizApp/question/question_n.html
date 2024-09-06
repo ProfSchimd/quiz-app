@@ -1,17 +1,35 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 {% block content %}
-<h2>{{ type }} Question (id: {{ q_id }})</h2>
-<h3>
+<h1 class="text-3xl">Question</h1>
+<h2 class="text-xl">{{ type }} (id: {{ q_id }})</h2>
+<div class="my-2">
 {% for t in tags %}
-#{{ t }}
+<code class="text-sm bg-gray-300 p-2 text-gray-500 hover:bg-gray-400 rounded-lg">#{{ t }}</code>
 {% endfor %}
-</h3>
-<p>
-    Text: <br>
-    {{ text | safe }}
-</p>
-<form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="submit">
-</form>
+</div>
+<div>
+    <fieldset class="border border-solid border-slate-300 dark:border-slate-800 p-3 mb-2">
+        <legend>Text</legend>
+        {{ text | safe }}
+    </fieldset>
+    <form method="post">{% csrf_token %}
+        <fieldset class="border border-solid border-slate-300 dark:border-slate-800 p-3 mb-2">
+            <legend>{{form.answers.label}}</legend>
+            {% for field in form.answers %}
+            <div class="my-2">
+                <label for="{{ field.auto_id }}">
+                    {{ field.label }}
+                </label>
+                <div class="mt-1">
+                    {{ field }}
+                </div>
+            </div>
+            {% endfor %}
+        </fieldset>
+        {% if to_submit %}
+            <button type="submit" value="submit" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 a:ring-cyan-200 font-medium rounded-lg text-sm mx-1 p-3 text-center">Submit</button>
+        {% endif %}
+        </form>
+</div>
 {% endblock %}
