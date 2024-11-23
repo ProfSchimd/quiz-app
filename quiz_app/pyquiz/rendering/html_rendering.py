@@ -41,7 +41,7 @@ def html_render_fill(q):
     to_fill = q._to_fill
     sol_filled = to_fill
     for j in range(len(correct)):
-        sol_filled = sol_filled.replace(f'{{{{{j}}}}}', correct[j].upper())
+        sol_filled = sol_filled.replace(f'{{{{{j}}}}}', f'<b>{correct[j]}</b>')
         to_fill = to_fill.replace(f'{{{{{j}}}}}', fill_placeholder)
 
     content_text += f'<p>{to_fill}</p>\n\n'

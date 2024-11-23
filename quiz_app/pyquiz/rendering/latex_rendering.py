@@ -15,7 +15,7 @@ fill_placeholder = ".................."
 
 def question_header(i: int, header_text: str="Domanda", use_exam_class: bool=False) -> str:
     if use_exam_class:
-        return '\\question\n'
+        return '\n\\question\n'
     return f'\n\\subsection*{{{header_text} {i}}}\n'
 
 
@@ -100,15 +100,17 @@ def latex_render_open(q, use_exam_class=False):
 
 
 def latex_render_exercise(q, use_exam_class=False):
-    content_text = f'{html_to_latex(q._text)}\n\\begin{{enumerate}}\n'
-    content_solution = f'{html_to_latex(q._text)}\n\\begin{{enumerate}}\n'
+    environment = "parts" if use_exam_class  else "enumerate"
+    item = "part" if use_exam_class else "item"
+    content_text = f'{html_to_latex(q._text)}\n\\begin{{{environment}}}\n'
+    content_solution = f'{html_to_latex(q._text)}\n\\begin{{{environment}}}\n'
     for sub_q in q._sub_questions:
         sub_q = html_to_latex(sub_q)
-        content_text += f'\\item {sub_q}\n'
-        content_solution += f'\\item {sub_q}\n'
+        content_text += f'\\{item} {sub_q}\n'
+        content_solution += f'\\{item} {sub_q}\n'
         
-    content_text += '\\end{enumerate}\n'
-    content_solution += '\\end{enumerate}\n'
+    content_text += f'\\end{{{environment}}}\n'
+    content_solution += f'\\end{{{environment}}}\n'
     return content_text, content_solution
 
 
@@ -133,16 +135,16 @@ def latex_render_by_type(q, use_exam_class=False):
     elif q._type == 'fill':
         text, solution = latex_render_fill(q, use_exam_class=use_exam_class)
     elif q._type =='exercise':
-        text, solution = latex_render_exercise(q)
+        text, solution = latex_render_exercise(q, use_exam_class)
     elif q._type == 'composite':
-        text, solution = latex_render_composite(q)
+        text, solution = latex_render_composite(q, use_exam_class)
     return text, solution
 
 # Same as latex_render, but uses strings in place of files (template, text, and solution)
 
 def latex_render_strings(questions: list, template: str, track_n: str, use_exam_class: bool=False):
     if template is None:
-        template = latex_exam_template_raq if use_exam_class else latex_template_raw
+        template = latex_exam_template_raw if use_exam_class else latex_template_raw
         
     text_content = ''
     solved_content = ''
@@ -223,7 +225,7 @@ latex_template_raw = r"""
 \end{document}
 """
 
-latex_exam_template_raq=r"""\documentclass[a4paper,10pt]{exam}
+latex_exam_template_raw=r"""\documentclass[a4paper,10pt]{exam}
 \usepackage[left=2.00cm, right=2.00cm, top=3.00cm, bottom=2.00cm]{geometry}
 \usepackage{amsmath}
 \usepackage{amsfonts}
@@ -237,6 +239,7 @@ latex_exam_template_raq=r"""\documentclass[a4paper,10pt]{exam}
 \checkboxchar{\raisebox{-.2em}{\Large$\square$}}
 \checkedchar{\raisebox{-.2em}{\Large$\checkmark$}}
 \setlength\fillinlinelength{1in}
+\qformat{\large{\textbf{Domanda \thequestion}}\\}
 
 %%--PREAMBLE--%%
 %\printanswers
@@ -256,6 +259,20 @@ latex_exam_template_raq=r"""\documentclass[a4paper,10pt]{exam}
 }
 
 \begin{document}
+% Uncomment for the grading table
+% \begin{center}
+%     {\small
+%     \begin{tabular}{|c|c|c|c||c|c|}
+%         \hline
+%         Conoscenze & Competenze & Completezza & Spiegazione & \textbf{~Punti~} & \textbf{~~Voto~~}\\
+%         \hline
+%         & & & & &\\
+%         & & & & &\\
+%         & & & & &\\
+%         \hline
+%     \end{tabular}
+%     }
+% \end{center}
 
 %%--CONTENT--%%
 
