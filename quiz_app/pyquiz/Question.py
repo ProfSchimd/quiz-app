@@ -46,12 +46,14 @@ class CheckboxQuestion(DisplayQuestion):
         
 
 class FillQuestion(DisplayQuestion):
-    def __init__(self, id, text, to_fill, weight, correct=[], type=None):
+    def __init__(self, id, text, to_fill, weight, correct=[], type=None, tags=None):
         super().__init__(id, text, weight)
         self._correct = correct
         self._to_fill = to_fill
         if type is not None:
             self._type = type
+        if tags is not None:
+            self._tags = tags
 
 class OpenQuestion(DisplayQuestion):
     def __init__(self, id, text, weight, type=None):
@@ -148,18 +150,20 @@ class RawChoiceQuestion(RawQuestion):
         
 
 class RawFillQuestion(RawQuestion):
-    def __init__(self, id, text, weight, to_fill, correct, type):
+    def __init__(self, id, text, weight, to_fill, correct, type, tags=None):
         super().__init__(id, text, weight)
         self._to_fill = to_fill
         self._correct = correct
         self._type = type
+        if tags is not None:
+            self._tags = tags
 
     def to_display_question(self):
-        return FillQuestion(self.id, self._text, self._to_fill, self._weight, self._correct, self._type)
+        return FillQuestion(self.id, self._text, self._to_fill, self._weight, self._correct, self._type, self._tags)
 
     @classmethod
     def from_dict(cls, d):
-        return cls(d['id'], d['text'], d.get('weight'), d['tofill'], d['correct'], d['type'])
+        return cls(d['id'], d['text'], d.get('weight'), d['tofill'], d['correct'], d['type'], tags=d.get('tags'))
 
 class RawOpenQuestion(RawQuestion):
     def __init__(self, id, text, weight, variants, type):
