@@ -12,7 +12,17 @@ from .rendering.json_rendering import json_render
 from .rendering.gift_rendering import gift_render
 from .util import get_similarity_matrix
 
-
+class QuestionFilter:
+    def __init__(self,args):
+        self._hidden = args.include_hidden
+    
+    def accepts(self, q: dict):
+        is_ok = True
+        # checks for the --include-hidden
+        if (enabled := q.get("status")) and (enabled == 'hidden'):
+            is_ok &= self._hidden
+        return is_ok
+    
 def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description='Generate random quiz from input JSON files.')
@@ -34,6 +44,10 @@ def parse_arguments() -> argparse.Namespace:
                         help='Defines the rendering type: latex, text (default is latex)')
     parser.add_argument('--template', dest='template', 
                         help="Indicates the template file")
+    parser.add_argument('--render-meta', dest='render_meta', action='store_true',
+                        help="If activated, renders meta information in the quiz.")
+    parser.add_argument('--include-hidden', dest="include_hidden", action='store_true',
+                        help="If activated, includes questions that are hidden")
     parser.add_argument('--test', dest='test', type=int,
                         default=0, help='Used for developing purpose')
     parser.add_argument('-v', '--verbosity', dest='verbosity', type=int,
@@ -50,12 +64,16 @@ def load_questions(input: str) -> list:
     questions = []
     for q in question_files:
         with open(os.path.expanduser(q)) as fp:
+            # TODO Here we should replace id with source.id to keep track of files
+            # from which the question come from
             questions += json.load(fp)
     return questions
 
 
-def parse_question_json(json_questions: list) -> list:
-    return [qst.RawQuestion.from_dict(q) for q in json_questions]
+def parse_question_json(json_questions: list, filter: QuestionFilter=None) -> list:
+    if filter is None:
+        filter = QuestionFilter()
+    return [qst.RawQuestion.from_dict(q) for q in json_questions if filter.accepts(q)]
     
 
 def create_quiz(questions: list, count: int, shuffle: bool=True) -> list:
@@ -124,6 +142,12 @@ def print_output(info: dict, verbosity: int):
                 row += f" {matrix[i][j]:^5.2} "
                 
             print(row)
+    if verbosity > 1:
+        for track, quiz in enumerate(info["tests"]):
+            print(f"Track {track}")
+            for i, q in enumerate(quiz):
+                print(f"Question {i} (id={q.id}): {q._type} ({q._weight}) ", "#" + " #".join(q._tags,))     
+    
     
         
 def main():
@@ -131,9 +155,10 @@ def main():
     # This contains output information 
     info = {}
 
-    # Load JSON file and convert to raw questions
+    # Load JSON file, filters questions, and convert to raw questions
+    filter = QuestionFilter(args)
     json_questions = load_questions(args.input)
-    questions = parse_question_json(json_questions)
+    questions = parse_question_json(json_questions, filter=filter)
     # Adjust the number of question in the quiz
     max_number = args.n
     if max_number < 0 or max_number > len(questions):
@@ -167,7 +192,6 @@ def main():
         )
         
     print_output(info, args.verbosity)
-
 
 if __name__ == "__main__":
     main()        
