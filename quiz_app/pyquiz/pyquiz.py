@@ -61,13 +61,18 @@ def load_questions(input: str) -> list:
     This function contains the logic to open file(s), merge them
     (if multiple are indicated)."""
     question_files = input.split(',')
-    questions = []
-    for q in question_files:
+    all_questions = []
+    for i, q in enumerate(question_files):
         with open(os.path.expanduser(q)) as fp:
-            # TODO Here we should replace id with source.id to keep track of files
-            # from which the question come from
-            questions += json.load(fp)
-    return questions
+            file_questions = json.load(fp)
+            for question in file_questions:
+                current_id = question.get('id')
+                # we don't expect this to happen
+                if current_id is None:
+                    current_id = random.randint(1000,9999)
+                question["id"] = f"{i}.{current_id}"
+            all_questions += file_questions
+    return all_questions
 
 
 def parse_question_json(json_questions: list, filter: QuestionFilter=None) -> list:
