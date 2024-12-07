@@ -29,8 +29,8 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Generate random quiz from input JSON files.')
     parser.add_argument('--number', dest='n', type=int, default=-1,
                         help='Number of questions, if -1 (default) use all')
-    parser.add_argument('--input', dest='input', default='questions.json',
-                        help='Comma separated list of JSON file(s) with questions')
+    parser.add_argument('--input', nargs='+', dest='input', required=True,
+                        help='Space separated list of JSON file(s) with questions')
     parser.add_argument('--output', dest='output', default='text',
                         help='Name of the output (text) file, without extension')
     parser.add_argument('--solution', dest='solution', default='solution',
@@ -56,12 +56,11 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_questions(input: str) -> list:
+def load_questions(question_files: list[str]) -> list:
     """Loads questions from file, but doesn't randomize it. 
     
     This function contains the logic to open file(s), merge them
     (if multiple are indicated)."""
-    question_files = input.split(',')
     all_questions = []
     for i, q in enumerate(question_files):
         with open(os.path.expanduser(q)) as fp:
@@ -79,7 +78,6 @@ def load_questions(input: str) -> list:
             all_questions += file_questions
             if len(id_set) < len(file_questions):
                 print(f"[WARNING] There seem to be duplicated ids in {q}")
-        
     return all_questions
 
 
@@ -153,7 +151,6 @@ def print_output(info: dict, verbosity: int):
             row = f"T{i:<3}"
             for j in range(n):
                 row += f" {matrix[i][j]:^5.2} "
-                
             print(row)
     if verbosity > 1:
         for track, quiz in enumerate(info["tests"]):
@@ -190,7 +187,7 @@ def main():
         args.seed = str(random.randint(0,2**30))
     random.seed(args.seed)
     info = {
-        "files": args.input.split(","),
+        "files": args.input,
         "questions": questions,
         "seed": args.seed,
         "tracks": args.tracks,
