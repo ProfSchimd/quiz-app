@@ -1,0 +1,41 @@
+\documentclass{article}
+\usepackage[a4paper, total={7in, 8.5in}]{geometry}
+\usepackage[utf8]{inputenc}
+% Uncomment for Verdana font
+% \usepackage{DejaVuSansCondensed}
+% \renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+\usepackage{amssymb}
+\usepackage{array}
+\usepackage{fancyhdr}
+\renewcommand{\headrulewidth}{0pt}
+
+% Uncomment \usepackage below for the page background pattern (to help students)
+% Patterns: std, dot ruled
+% Colorsets: std, ghostly
+% \usepackage[pattern=dot, colorset=ghostly, textarea]{gridpapers}
+
+\title{Quiz}
+
+\begin{document}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhf[HC]{
+    \begin{tabular}{|m{3.5in}|m{1.25in}|m{1.75in}|}
+    \hline 
+    &&\\[-9pt]
+    Cognome e Nome & Classe  & Data\\[3pt]
+    \hline
+    \end{tabular}
+}
+\fancyhf[FR]{
+    T:0
+}
+
+
+
+% \fillwithdottedlines{\stretch{1}}
+% \pagebreak
+% \fillwithdottedlines{\stretch{1}}
+
+\end{document}

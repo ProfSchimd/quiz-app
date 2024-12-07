@@ -3,6 +3,7 @@ import json
 import random
 import argparse
 import os.path
+import sys
 
 from . import Question as qst
 from .rendering.latex_rendering import latex_render
@@ -13,7 +14,7 @@ from .rendering.gift_rendering import gift_render
 from .util import get_similarity_matrix
 
 class QuestionFilter:
-    def __init__(self,args):
+    def __init__(self, args):
         self._hidden = args.include_hidden
     
     def accepts(self, q: dict):
@@ -65,13 +66,20 @@ def load_questions(input: str) -> list:
     for i, q in enumerate(question_files):
         with open(os.path.expanduser(q)) as fp:
             file_questions = json.load(fp)
+            # Check uniqueness of id's (only for information purpose)
+            id_set = set()
             for question in file_questions:
                 current_id = question.get('id')
+                id_set.add(current_id)
                 # we don't expect this to happen
                 if current_id is None:
+                    print(f"[WARNING] Found empty id in {q}")
                     current_id = random.randint(1000,9999)
                 question["id"] = f"{i}.{current_id}"
             all_questions += file_questions
+            if len(id_set) < len(file_questions):
+                print(f"[WARNING] There seem to be duplicated ids in {q}")
+        
     return all_questions
 
 
@@ -162,7 +170,14 @@ def main():
 
     # Load JSON file, filters questions, and convert to raw questions
     filter = QuestionFilter(args)
-    json_questions = load_questions(args.input)
+    try:
+        json_questions = load_questions(args.input)
+    except FileNotFoundError as e:
+        print(f"CRITICAL ERROR: {e} (Terminating)")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"CRITICAL ERROR (JSON): {e} (Terminating)")
+        sys.exit(1)
     questions = parse_question_json(json_questions, filter=filter)
     # Adjust the number of question in the quiz
     max_number = args.n
@@ -174,12 +189,14 @@ def main():
         # Convert int to string to be consistent with the seed parameter
         args.seed = str(random.randint(0,2**30))
     random.seed(args.seed)
-    info["files"] = args.input.split(",")
-    info["questions"] = questions
-    info["seed"] = args.seed
-    info["tracks"] = args.tracks
-    info["number"] = max_number
-    info["tests"] = []
+    info = {
+        "files": args.input.split(","),
+        "questions": questions,
+        "seed": args.seed,
+        "tracks": args.tracks,
+        "number": max_number,
+        "tests": [],
+    }
     
     for track in range(args.tracks):
         # Create quiz
@@ -189,8 +206,8 @@ def main():
         out_file = args.output
         sol_file = args.solution
         if args.tracks > 1:
-            out_file += f'_{track}'
-            sol_file += f'_{track}'
+            out_file += f"_{track}"
+            sol_file += f"_{track}"
         render_quiz(quiz, args.template, out_file,
             sol_file, track, args.render,
             os.path.expanduser(args.destination)
