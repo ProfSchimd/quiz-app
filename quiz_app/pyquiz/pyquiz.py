@@ -20,8 +20,13 @@ class QuestionFilter:
     def accepts(self, q: dict):
         is_ok = True
         # checks for the --include-hidden
-        if (enabled := q.get("status")) and (enabled == 'hidden'):
-            is_ok &= self._hidden
+        if (enabled := q.get("status")):
+            if (enabled == 'hidden'):
+                is_ok &= self._hidden
+            elif (enabled == 'active'):
+                is_ok &= True
+            else:
+                is_ok &= False # could be `return False`
         return is_ok
     
 def parse_arguments() -> argparse.Namespace:
