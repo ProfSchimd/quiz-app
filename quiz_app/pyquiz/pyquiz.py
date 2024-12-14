@@ -14,8 +14,10 @@ from .rendering.gift_rendering import gift_render
 from .util import get_similarity_matrix
 
 class QuestionFilter:
-    def __init__(self, args):
-        self._hidden = args.include_hidden
+    def __init__(self, args=None):
+        self._hidden = False
+        if args is not None:
+            self._hidden = args.include_hidden
     
     def accepts(self, q: dict):
         is_ok = True
