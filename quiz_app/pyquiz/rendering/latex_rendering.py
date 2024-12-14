@@ -54,7 +54,7 @@ def latex_render_choices(q, use_exam_class=False):
         if use_exam_class:
             content_text += '  \\CorrectChoice ' if correct[j] == 1 else f'  \\choice ' 
             content_text += f'{html_to_latex(o)}\n'
-            content_solution += '  \\CorrectChoice ' if correct[j] == 1 else f'  \\choice  ' 
+            content_solution += '  \\CorrectChoice ' if correct[j] == 1 else f'  \\choice ' 
             content_solution += f'{html_to_latex(o)}\n'
         else:
             content_text += f'  \\item[$\\square$] {html_to_latex(o)}\n'
