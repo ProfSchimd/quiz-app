@@ -220,11 +220,11 @@ def question_upload_confirm(request):
                 if q["id"] in included_questions:
                     print(q["id"], q["type"])
                     # TODO: This changes for other type of question (e.g. fill)
-                    text_and_key = {
-                        "text": q["text"],
-                        "options": q["options"],
-                        "correct": q["correct"]
-                    }
+                    # text_and_key = {
+                    #     "text": q["text"],
+                    #     "options": q["options"],
+                    #     "correct": q["correct"]
+                    # }
                             
                     # qModel = Question(
                     #     question_type=q["type"].upper(),
@@ -272,6 +272,10 @@ def question_upload_confirm(request):
                 request=request
             )
     return redirect("question_upload")
+
+def question_edit(request, pk=0):
+    context = {}
+    return render(template_name="QuizApp/question/question_edit.html", context=context, request=request)
 
 def collection_from_questions(request):
     return redirect("index")
