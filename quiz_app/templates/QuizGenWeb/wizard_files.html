@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="content">
+    <h1 class="text-3xl">Select Files</h1>
+
+    <form action="{% url 'wizard_files' %}" method="post">
+        {% csrf_token %}
+        <div class="my-4">
+            <h2 class="text-xl">Available Files</h2>
+            <ul class="list-none px-4">
+                {% for file in files %}
+                <li class="my-2 flex items-center">
+                    <input type="checkbox" id="file_{{ file.id }}" name="file_ids" value="{{ file.id }}" class="mr-2">
+                    <label for="file_{{ file.id }}" class="cursor-pointer">
+                        <span class="font-medium">{{ file.name }}</span>
+                    </label>
+                </li>
+                {% empty %}
+                <li class="my-2 text-gray-500">No files available.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="my-4">
+            <button type="submit"
+                class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                Add
+            </button>
+            <a href="{% url 'wizard_files' %}"
+                class="text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                Reset
+            </a>
+        </div>
+    </form>
+</div>
+
+
+<!-- Selected files list -->
+<div class="my-4">
+    <h2 class="text-xl font-medium">Selected Files</h2>
+    <ul class="list-none px-4">
+        {% for file in selected_files %}
+        <li class="my-2 flex justify-between items-center">
+            <div>
+                <h3 class="text-lg">{{ file.id }} - {{ file.name }}</h3>
+                <div class="pl-2 text-sm">
+                    {{ file.count }} Questions<br>
+                    <span class="text-xs font-mono">{{ file.path }}</span>
+                </div>
+            </div>
+            <!-- Delete file form -->
+            <form method="post" class="inline-block">
+                {% csrf_token %}
+                <input type="hidden" name="delete_file" value="{{ file.id }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> <!-- Bootstrap Trash Icon -->
+                </button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<!-- Submit selected files to wizard_params -->
+<form action="{% url 'wizard_params' %}" method="post">
+    {% csrf_token %}
+    <!-- Hidden inputs for file URLs -->
+    {% for file in selected_files %}
+    <input type="hidden" name="file_ids" value="{{ file.id }}">
+    {% endfor %}
+    <button
+        class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5"
+        type="submit">Next</button>
+</form>
+</div>
+{% endblock %}

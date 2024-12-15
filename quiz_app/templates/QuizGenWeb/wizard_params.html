@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="content">
+    <form action="{% url 'wizard_confirm' %}" method="post">{% csrf_token %}
+        <div class="my-4">
+            <h2 class="text-xl font-medium">Selected Files</h2>
+            <ul class="list-none px-4">
+                {% for file in selected_files %}
+                <li class="my-2">
+                    <div>
+                        <h3>{{ file.name }}</h3>
+                        <input type="hidden" name="file_urls" value="{{ file_url }}">
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="my-4">
+
+            <!-- --number -->
+            <div class="mb-4">
+                <label for="id_n" class="block text-lg font-medium">Number of Questions</label>
+                <input type="number" id="id_n" name="n" value="-1"
+                    class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                <small class="text-gray-500 dark:text-gray-400">Number of questions to include. Use -1 (default) to include all.</small>
+            </div>
+            <!-- --tracks -->
+            <div class="mb-4">
+                <label for="id_tracks" class="block text-lg font-medium">Number of Tracks</label>
+                <input type="number" id="id_tracks" name="tracks" value="1"
+                    class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                <small class="text-gray-500 dark:text-gray-400">Default is 1.</small>
+            </div>
+            <!-- --seed -->
+            <div class="mb-4">
+                <label for="id_seed" class="block text-lg font-medium">Seed</label>
+                <input type="number" id="id_seed" name="seed"
+                    class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                <small class="text-gray-500 dark:text-gray-400">Integer value for seeding randomization. Default is no seeding.</small>
+            </div>
+
+            <!-- --render -->
+            <div class="mb-4">
+                <label for="id_render" class="block text-lg font-medium">Render Type</label>
+                <select id="id_render" name="render"
+                    class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                    <option value="latex-exam" selected>Latex Exam</option>
+                    <option value="latex" selected>Latex</option>
+                    <option value="html" selected>HTML</option>
+                    <option value="text">Text</option>
+                </select>
+                <small class="text-gray-500 dark:text-gray-400">Defines the rendering type. Default is "latex".</small>
+            </div>
+
+            <!-- --render-meta -->
+            <div class="mb-4">
+                <label class="flex items-center">
+                    <input type="checkbox" id="id_render_meta" name="render_meta" class="mr-2">
+                    <span>Render Meta Information</span>
+                </label>
+                <small class="text-gray-500 dark:text-gray-400">If activated, renders meta information in the quiz.</small>
+            </div>
+
+            <!-- --include-hidden -->
+            <div class="mb-4">
+                <label class="flex items-center">
+                    <input type="checkbox" id="id_include_hidden" name="include_hidden" class="mr-2">
+                    <span>Include Hidden Questions</span>
+                </label>
+                <small class="text-gray-500 dark:text-gray-400">If activated, includes hidden questions.</small>
+            </div>
+
+
+            <details>
+                <summary>Advanced Settings</summary>
+
+                <!-- --output -->
+                <div class="mb-4">
+                    <label for="id_output" class="block text-lg font-medium">Output File Name</label>
+                    <input type="text" id="id_output" name="output" value="text"
+                        class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                    <small class="text-gray-500 dark:text-gray-400">Name of the output file (without extension). Default is "text".</small>
+                </div>
+
+                <!-- --solution -->
+                <div class="mb-4">
+                    <label for="id_solution" class="block text-lg font-medium">Solution File Name</label>
+                    <input type="text" id="id_solution" name="solution" value="solution"
+                        class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                    <small class="text-gray-500 dark:text-gray-400">Name of the solution file (without extension). Default is
+                        "solution".</small>
+                </div>
+
+
+                <!-- --template -->
+                <div class="mb-4">
+                    <label for="id_template" class="block text-lg font-medium">Template File</label>
+                    <input type="text" id="id_template" name="template"
+                        class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                    <small class="text-gray-500 dark:text-gray-400">Indicates the template file.</small>
+                </div>
+
+            </details>
+
+            <div class="my-4">
+                <button
+                    class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5"
+                    type="submit">Submit</button>
+                <a href="{% url 'wizard_files' %}"
+                    class="text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">Back</a>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

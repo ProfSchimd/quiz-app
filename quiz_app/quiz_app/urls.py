@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('QuizApp.urls')),
+    path('gen/', include('QuizGenWeb.urls'), name='generator'),
 ]
