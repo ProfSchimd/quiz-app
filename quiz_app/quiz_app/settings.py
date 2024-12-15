@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'quiz.apps.QuizConfig',
     'QuizApp.apps.QuizappConfig',
     'widget_tweaks',
 ]
