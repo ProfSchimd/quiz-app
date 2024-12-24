@@ -1,4 +1,3 @@
-import html
 
 fill_placeholder ='<input type="textbox" style="padding: 1px">'
 

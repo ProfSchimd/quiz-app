@@ -4,7 +4,7 @@ from .. import util
 # - (DONE) Add 'use_exam_class' flag that distinguished "standard" LaTeX and 'exam' class 
 # - (DONE) Template file for 'exam' class 
 # - Switch from \section to \question using points
-# - Replace the multiple choice rendering: (i) itemize becomes (ii) use \choice and \CorrectChoice
+# - (DONE) Replace the multiple choice rendering: (i) itemize becomes (ii) use \choice and \CorrectChoice
 # - (DONE) Replace fill rendering to use \fillin
 # - (DONE) Implement solution with \printsolutions toggled
 # - Review the general layout of the resulting file
@@ -52,9 +52,9 @@ def latex_render_choices(q, use_exam_class=False):
     content_solution = f'{html_to_latex(text)}\n\\begin{{{list_environment}}}\n'
     for j, o in enumerate(options):
         if use_exam_class:
-            content_text += '  \\CorrectChoice ' if correct[j] == 1 else f'  \\choice ' 
+            content_text += '  \\CorrectChoice ' if correct[j] == 1 else '  \\choice ' 
             content_text += f'{html_to_latex(o)}\n'
-            content_solution += '  \\CorrectChoice ' if correct[j] == 1 else f'  \\choice ' 
+            content_solution += '  \\CorrectChoice ' if correct[j] == 1 else '  \\choice ' 
             content_solution += f'{html_to_latex(o)}\n'
         else:
             content_text += f'  \\item[$\\square$] {html_to_latex(o)}\n'
@@ -135,9 +135,9 @@ def latex_render_by_type(q, use_exam_class=False):
     elif q._type == 'fill':
         text, solution = latex_render_fill(q, use_exam_class=use_exam_class)
     elif q._type =='exercise':
-        text, solution = latex_render_exercise(q, use_exam_class)
+        text, solution = latex_render_exercise(q, use_exam_class=use_exam_class)
     elif q._type == 'composite':
-        text, solution = latex_render_composite(q, use_exam_class)
+        text, solution = latex_render_composite(q, use_exam_class=use_exam_class)
     return text, solution
 
 # Same as latex_render, but uses strings in place of files (template, text, and solution)
