@@ -13,12 +13,13 @@ def process_file(file):
     return {
         "id": file.id,
         "path": file.path,
+        "name": file.name(),
         "count": len(questions),
         "types": {
-            "single": 0,
-            "multiple": 0,
-            "invertible": 0,
-            "fill": 0,
+            "single": len([q for q in questions if q["type"] == "single"]),
+            "multiple": len([q for q in questions if q["type"] == "multiple"]),
+            "invertible": len([q for q in questions if q["type"] == "invertible"]),
+            "fill": len([q for q in questions if q["type"] == "fill"]),
         },
     }
 
@@ -67,8 +68,42 @@ def wizard_params(request):
 
 
 def wizard_confirm(request):
-    return render(request=request, template_name="QuizGenWeb/wizard_confirm.html")
+    if request.method == "POST":
+        selected_file_ids = request.POST.getlist("file_ids")
+        selected_files = QuizFile.objects.filter(id__in=selected_file_ids)
+        # currently we use a workaround by inserting **POST. However,
+        # this MUST be changed in the future to add parameters checking
+        # and prevent security issues by sharing CRSF token.
+        context = {
+            "selected_files": [process_file(file) for file in selected_files],
+            **request.POST,
+        }
+        return render(
+            request=request,
+            template_name="QuizGenWeb/wizard_confirm.html",
+            context=context,
+        )
+    return redirect("wizard_files")
 
 
 def wizard_download(request):
-    return render(request=request, template_name="QuizGenWeb/wizard_download.html")
+    if request.method == "POST":
+        # Create a destination directory, prepare args, and use pyquiz
+        # script from the CLI app.
+        print(request.POST)
+        selected_file_ids = request.POST.getlist("file_ids")
+        selected_files = QuizFile.objects.filter(id__in=selected_file_ids)
+        args = {
+            "input": [file.path for file in selected_files],
+            "destination": "/tmp",
+            "n": int(request.POST.get("n"))
+        }
+        print(args)
+        #pyquiz.run(args)
+        context = {}
+        return render(
+            request=request,
+            template_name="QuizGenWeb/wizard_download.html",
+            context=context,
+        )
+    return redirect("wizard_files")

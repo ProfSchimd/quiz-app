@@ -3,6 +3,19 @@
 <div id="content">
     <h1 class="text-3xl">Test summary</h1>
     <form action="{% url 'wizard_download' %}" method="post">{% csrf_token %}
+        <div class="my-4">
+            <h2 class="text-xl font-medium">Selected Files</h2>
+            <ul class="list-none px-4">
+                {% for file in selected_files %}
+                <li class="my-2">
+                    <div>
+                        <h3>{{ file.name }}</h3>
+                        <input type="hidden" name="file_ids" value="{{ file.id }}">
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
         <button class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 a:ring-cyan-200 font-medium rounded-lg text-sm mx-1 p-3 text-center" role="button" type="submit">Confirm</button>
     </form>
 </div>
