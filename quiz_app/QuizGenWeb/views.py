@@ -1,7 +1,7 @@
-from .models import QuizFile
+from django.shortcuts import redirect, render
 from pyquiz import pyquiz
 
-from django.shortcuts import redirect, render
+from .models import QuizFile
 
 
 def index(request):
@@ -18,7 +18,9 @@ def process_file(file):
         "types": {
             "single": len([q for q in questions if q["type"] == "single"]),
             "multiple": len([q for q in questions if q["type"] == "multiple"]),
-            "invertible": len([q for q in questions if q["type"] == "invertible"]),
+            "invertible": len(
+                [q for q in questions if q["type"] == "invertible"]
+            ),
             "fill": len([q for q in questions if q["type"] == "fill"]),
         },
     }
@@ -32,7 +34,9 @@ def wizard_files(request):
     if request.method == "POST":
         # Add checked files
         if "file_ids" in request.POST:
-            selected_file_ids |= set([int(i) for i in request.POST.getlist("file_ids")])
+            selected_file_ids |= set(
+                [int(i) for i in request.POST.getlist("file_ids")]
+            )
         # Removed deleted files
         if "delete_file" in request.POST:
             selected_file_ids -= {int(request.POST["delete_file"])}
@@ -69,14 +73,17 @@ def wizard_params(request):
 
 def wizard_confirm(request):
     if request.method == "POST":
+        # We should check that all parameters are given, otherwise we should
+        # redirect to previous 
         selected_file_ids = request.POST.getlist("file_ids")
         selected_files = QuizFile.objects.filter(id__in=selected_file_ids)
-        # currently we use a workaround by inserting **POST. However,
-        # this MUST be changed in the future to add parameters checking
-        # and prevent security issues by sharing CRSF token.
         context = {
             "selected_files": [process_file(file) for file in selected_files],
-            **request.POST,
+            "file_ids": [int(id) for id in request.POST.getlist("file_ids")],
+            "n": int(request.POST.get("n", -1)),
+            "tracks": int(request.POST.get("tracks", 1)),
+            "seed": request.POST.get("seed"),
+            "render": request.POST.get("render"),
         }
         return render(
             request=request,
@@ -90,16 +97,27 @@ def wizard_download(request):
     if request.method == "POST":
         # Create a destination directory, prepare args, and use pyquiz
         # script from the CLI app.
-        print(request.POST)
         selected_file_ids = request.POST.getlist("file_ids")
         selected_files = QuizFile.objects.filter(id__in=selected_file_ids)
         args = {
             "input": [file.path for file in selected_files],
             "destination": "/tmp",
-            "n": int(request.POST.get("n"))
+            "n": int(request.POST.get("n")),
+            "seed": request.POST.get("seed"),
+            "tracks": int(request.POST.get("tracks")),
+            "render": request.POST.get("render"),
+            "output": "text",
+            "solution": "solution",
+            "template": None,
+            "render_meta": False,
+            "include_hidden": False,
+            "test": 0,
+            "verbosity": 0, 
         }
         print(args)
-        #pyquiz.run(args)
+        from argparse import Namespace
+        ns = Namespace(**args)
+        pyquiz.run(ns)
         context = {}
         return render(
             request=request,
