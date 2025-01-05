@@ -3,8 +3,10 @@
 import argparse
 import json
 import os.path
+import pathlib
 import random
 import sys
+from typing import Any
 
 from . import Question as qst
 from .rendering.gift_rendering import gift_render
@@ -123,6 +125,15 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def json_to_questions(json_file: Any) -> list:
+    questions = []
+    if type(json_file) is str:
+        json_file = pathlib.Path(json_file)
+    with open(json_file.expanduser(), "r") as fp:
+        questions = json.load(fp)
+    return questions
+
+
 def load_questions(question_files: list[str]) -> list:
     """Loads questions from file, but doesn't randomize it.
 
@@ -130,21 +141,20 @@ def load_questions(question_files: list[str]) -> list:
     (if multiple are indicated)."""
     all_questions = []
     for i, q in enumerate(question_files):
-        with open(os.path.expanduser(q)) as fp:
-            file_questions = json.load(fp)
-            # Check uniqueness of id's (only for information purpose)
-            id_set = set()
-            for question in file_questions:
-                current_id = question.get("id")
-                id_set.add(current_id)
-                # we don't expect this to happen
-                if current_id is None:
-                    print(f"[WARNING] Found empty id in {q}")
-                    current_id = random.randint(1000, 9999)
-                question["id"] = f"{i}.{current_id}"
-            all_questions += file_questions
-            if len(id_set) < len(file_questions):
-                print(f"[WARNING] There seem to be duplicated ids in {q}")
+        file_questions = json_to_questions(pathlib.Path(q))
+        # Check uniqueness of id's (only for information purpose)
+        id_set = set()
+        for question in file_questions:
+            current_id = question.get("id")
+            id_set.add(current_id)
+            # we don't expect this to happen
+            if current_id is None:
+                print(f"[WARNING] Found empty id in {q}")
+                current_id = random.randint(1000, 9999)
+            question["id"] = f"{i}.{current_id}"
+        all_questions += file_questions
+        if len(id_set) < len(file_questions):
+            print(f"[WARNING] There seem to be duplicated ids in {q}")
     return all_questions
 
 
