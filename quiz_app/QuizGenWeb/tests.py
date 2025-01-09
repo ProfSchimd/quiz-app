@@ -45,4 +45,5 @@ class ViewsTest(TestCase):
                 f'<input type="hidden" name="{k}" value="{params[k]}">',
                 html=True
             )
+            self.assertEqual(str(self.client.session[k]), str(v))
         

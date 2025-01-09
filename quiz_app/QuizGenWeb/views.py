@@ -56,15 +56,19 @@ def wizard_params(request):
         # Get selected files from the POST request
         selected_file_ids = request.POST.getlist("file_ids")
         selected_files = QuizFile.objects.filter(id__in=selected_file_ids)
-
+        
         # Prepare the context with the selected file URLs
         context = {
             "selected_files": selected_files,
+            "n": request.session.get("n") or None,
+            "tracks": request.session.get("n") or None,
+            "seed": request.session.get("seed") or None,
         }
         return render(
             request=request,
             template_name="QuizGenWeb/wizard_params.html",
             context=context,
+            
         )
 
     # Redirect to `wizard_files` if accessed via GET
@@ -85,6 +89,10 @@ def wizard_confirm(request):
             "seed": request.POST.get("seed"),
             "render": request.POST.get("render"),
         }
+        request.session["n"] = context["n"]
+        request.session["tracks"] = context["tracks"]
+        request.session["seed"] = context["seed"]
+        request.session["render"] = context["render"]
         return render(
             request=request,
             template_name="QuizGenWeb/wizard_confirm.html",
