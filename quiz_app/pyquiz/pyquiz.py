@@ -159,6 +159,16 @@ def load_questions(question_files: list[str]) -> list:
 
 
 def parse_question_json(json_questions: list, filter: QuestionFilter = None) -> list:
+    """Returns a list of `Question` objects obtained parsing the input
+    JSON applying the (optional) given filter.
+
+    Args:
+        json_questions (list): JSON with raw questions
+        filter (QuestionFilter, optional): Filters to apply. Defaults to None.
+
+    Returns:
+        list: The parsed list of `Question` objects.
+    """
     if filter is None:
         filter = QuestionFilter()
     return [qst.RawQuestion.from_dict(q) for q in json_questions if filter.accepts(q)]
@@ -240,7 +250,7 @@ def print_output(info: dict, verbosity: int):
             for j in range(n):
                 row += f" {matrix[i][j]:^5.2} "
             print(row)
-    if verbosity > 1:
+    if verbosity > 2:
         for track, quiz in enumerate(info["tests"]):
             print(f"Track {track}")
             for i, q in enumerate(quiz):
@@ -268,6 +278,7 @@ def run(args):
         # Convert int to string to be consistent with the seed parameter
         args.seed = str(random.randint(0, 2**30))
     random.seed(args.seed)
+    
     info = {
         "files": args.input,
         "questions": questions,
@@ -297,19 +308,20 @@ def run(args):
             os.path.expanduser(args.destination),
         )
 
-    print_output(info, args.verbosity)
+    return info
 
 
 def main():
     args = parse_arguments()
     try:
-        run(args)
+        info = run(args)
     except FileNotFoundError as e:
         print(f"CRITICAL ERROR: {e} (Terminating)")
         sys.exit(1)
     except json.JSONDecodeError as e:
         print(f"CRITICAL ERROR (JSON): {e} (Terminating)")
         sys.exit(1)
+    print_output(info, args.verbosity)
 
 
 if __name__ == "__main__":

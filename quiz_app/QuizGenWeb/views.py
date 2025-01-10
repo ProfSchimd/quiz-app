@@ -122,7 +122,6 @@ def wizard_download(request):
             "test": 0,
             "verbosity": 0, 
         }
-        print(args)
         from argparse import Namespace
         ns = Namespace(**args)
         pyquiz.run(ns)

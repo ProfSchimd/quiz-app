@@ -1,11 +1,14 @@
+import json
 from pathlib import Path
 import tempfile
 import unittest
 
 from . import pyquiz
+from .Question import Question
+from . import util
+
 
 class PyquizTest(unittest.TestCase):
-        
     def test_json_to_questions(self):
         with tempfile.NamedTemporaryFile(delete_on_close=False) as fp:
             fp.write(raw_json.encode("utf-8"))
@@ -14,18 +17,16 @@ class PyquizTest(unittest.TestCase):
             n_single = len([q for q in questions if q["type"] == "single"])
             self.assertEqual(len(questions), 7, "Incorrect question count")
             self.assertEqual(
-                n_single,
-                4,
-                "Incorrect total questions of type 'single'"
+                n_single, 4, "Incorrect total questions of type 'single'"
             )
-            
+
             questions_path = pyquiz.json_to_questions(Path(fp.name))
             self.assertEqual(
                 str(questions),
                 str(questions_path),
-                "Unmatched loads from str and Path"
+                "Unmatched loads from str and Path",
             )
-            
+
     def test_load_questions(self):
         with tempfile.NamedTemporaryFile(delete_on_close=False) as fp1:
             with tempfile.NamedTemporaryFile(delete_on_close=False) as fp2:
@@ -33,17 +34,28 @@ class PyquizTest(unittest.TestCase):
                 fp2.write(raw_json_2.encode("utf-8"))
                 fp1.close()
                 fp2.close()
-                
+
                 questions = pyquiz.load_questions([fp1.name, fp2.name])
                 self.assertEqual(
-                    len(questions),
-                    9,
-                    "Incorrect total question count")
-                self.assertEqual(
-                    len([q for q in questions if q["type"] == "fill"]), 
-                    3,
-                    "Incorrect total questions of type 'fill'"
+                    len(questions), 9, "Incorrect total question count"
                 )
+                self.assertEqual(
+                    len([q for q in questions if q["type"] == "fill"]),
+                    3,
+                    "Incorrect total questions of type 'fill'",
+                )
+                
+    def test_parse_question_json(self):
+        questions = pyquiz.parse_question_json(json.loads(raw_json))
+        ids = [q.id for q in questions]
+        self.assertEqual(
+            len(questions),
+            7,
+            "Wrong number of questions list."
+        )
+        self.assertIn("001", ids, "Expected id not present")
+        self.assertNotIn("123", ids, "Unexpected question id")
+        
 
 
 class RenderTest(unittest.TestCase):
@@ -54,7 +66,33 @@ class QuestionTest(unittest.TestCase):
     pass
 
 
-raw_json="""[
+class UtilTest(unittest.TestCase):
+    def test_block_code(self):
+        self.assertTrue(
+            util.is_code_block("<code>This is code</code>"),
+            "Unidentified code block",
+        )
+        self.assertFalse(
+            util.is_code_block("Not code <code>a</code>"),
+            "Identified non-code block",
+        )
+
+    def test_similarity_matrix(self):
+        one = Question("001", "Text1", 1, ["A"])
+        two = Question("002", "Text11", 1, ["B"])
+        three = Question("003", "text111", 1, ["C"])
+
+        list = [[one, two], [two, three], [one, two]]
+
+        matrix = util.get_similarity_matrix(list)
+        for i in range(2):
+            self.assertEqual(matrix[i][i], 1, "Diagonal values are not 1")
+        self.assertEqual(
+            matrix[0][1], matrix[1][0], "Asymmetric matrix (0,1)!=(1,0)"
+        )
+
+
+raw_json = """[
     {
         "id": "001",
         "type": "single",
