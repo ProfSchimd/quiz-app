@@ -220,13 +220,14 @@ def render_quiz(
         gift_render(quiz, template, text_path)
 
 
-def print_output(info: dict, verbosity: int):
+def print_output(info: dict, verbosity: int, file: str = None):
+    s = ""
     if verbosity == 0:
         return
-    print(f'Input:  {len(info["files"])} file(s) {len(info["questions"])} question(s)')
-    print(f'Seed:   {info["seed"]}')
-    print(f'Tracks: {info["tracks"]}')
-    print(f'Number: {info["number"]}')
+    s += f'Input:  {len(info["files"])} file(s) {len(info["questions"])} question(s)\n'
+    s += f'Seed:   {info["seed"]}\n'
+    s += f'Tracks: {info["tracks"]}\n'
+    s += f'Number: {info["number"]}\n'
     table = {"header": [], "weights": [], "questions": []}
     for i, quiz in enumerate(info["tests"]):
         table["header"].append(f"T{i}")
@@ -234,33 +235,33 @@ def print_output(info: dict, verbosity: int):
         table["questions"].append(
             [f"{q.id} ({q._type[0].upper()}:{q._weight})" for q in quiz]
         )
-    print("".join([f"{t:^12}" for t in table["header"]]))
-    print("".join([f"{t:^12}" for t in table["weights"]]))
+    s += "".join([f"{t:^12}" for t in table["header"]]) + "\n"
+    s += "".join([f"{t:^12}" for t in table["weights"]]) + "\n"
     if verbosity > 1:
         # Print summary of questions with IDs
         for r in zip(*table["questions"]):
-            print("".join([f"{t:^12}" for t in r]))
+            s += "".join([f"{t:^12}" for t in r]) + "\n"
         # Print a similarity matrix
         matrix = get_similarity_matrix(info["tests"])
         n = len(info["tests"])
-        print()
-        print("    ", "".join([f" T{i:<4} " for i in range(n)]))
+        
+        s += "\n    " + "".join([f" T{i:<4} " for i in range(n)]) + "\n"
         for i in range(n):
             row = f"T{i:<3}"
             for j in range(n):
                 row += f" {matrix[i][j]:^5.2} "
-            print(row)
+            s += row + "\n"
     if verbosity > 2:
         for track, quiz in enumerate(info["tests"]):
-            print(f"Track {track}")
+            s += f"Track {track}\n"
             for i, q in enumerate(quiz):
-                print(
-                    f"Question {i} (id={q.id}): {q._type} ({q._weight}) ",
-                    "#"
-                    + " #".join(
-                        q._tags,
-                    ),
-                )
+                s += f"Question {i} (id={q.id}): {q._type} ({q._weight}) #"
+                s += " #".join(q._tags,) + "\n"
+    if file:
+        with open(file, "w") as f:
+            f.write(s)
+    else:
+        print(s)
 
 
 def run(args):

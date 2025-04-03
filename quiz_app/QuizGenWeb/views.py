@@ -47,6 +47,7 @@ def wizard_files(request):
     context = {
         "files": QuizFile.objects.all(),
         "selected_files": [process_file(file) for file in selected_files],
+        "subjects": list(set(str(file.subject) for file in selected_files)),
     }
     return render(request, "QuizGenWeb/wizard_files.html", context=context)
 
@@ -124,7 +125,8 @@ def wizard_download(request):
         }
         from argparse import Namespace
         ns = Namespace(**args)
-        pyquiz.run(ns)
+        info = pyquiz.run(ns)
+        pyquiz.print_output(info, 3, "/tmp/info.txt")
         context = {}
         return render(
             request=request,
@@ -132,3 +134,10 @@ def wizard_download(request):
             context=context,
         )
     return redirect("wizard_files")
+
+
+def edit_select_files(request):
+    context = {
+        "files": QuizFile.objects.all(),
+    }
+    return render(request, "QuizGenWeb/edit_file_select.html", context=context)

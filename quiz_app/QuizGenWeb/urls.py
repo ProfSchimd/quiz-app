@@ -8,4 +8,5 @@ urlpatterns = [
     path("wizard/params", views.wizard_params, name="wizard_params"),
     path("wizard/confirm", views.wizard_confirm, name="wizard_confirm"),
     path("wizard/download", views.wizard_download, name="wizard_download"),
+    path("edit/file", views.edit_select_files, name="edit_file_select"),
 ]

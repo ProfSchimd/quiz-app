@@ -1,0 +1,12 @@
+<ul class="list-none px-4">
+    {% for file in files %}
+    <li class="my-2 flex items-center">
+        <input type="checkbox" id="file_{{ file.id }}" name="file_ids" value="{{ file.id }}" class="mr-2">
+        <label for="file_{{ file.id }}" class="cursor-pointer">
+            <span class="font-medium">{{ file.name }}</span>
+        </label>
+    </li>
+    {% empty %}
+    <li class="my-2 text-gray-500">No files available.</li>
+    {% endfor %}
+</ul>

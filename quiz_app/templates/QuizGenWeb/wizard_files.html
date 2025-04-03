@@ -1,24 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-<div id="content">
-    <h1 class="text-3xl">Select Files</h1>
+{% block extra_scripts %}
+<!-- TODO: Change this to an include template which uses local Alpine JS (for offline work) -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+<div x-data="{ subjects: {{ subjects }} }" id="content">
+    <h1 class="text-3xl">Select Files <span x-text="name"></span></h1>
+    <template x-for="subject in subjects">
+        <span x-text="subject"></span>
+    </template>
 
     <form action="{% url 'wizard_files' %}" method="post">
         {% csrf_token %}
         <div class="my-4">
             <h2 class="text-xl">Available Files</h2>
-            <ul class="list-none px-4">
-                {% for file in files %}
-                <li class="my-2 flex items-center">
-                    <input type="checkbox" id="file_{{ file.id }}" name="file_ids" value="{{ file.id }}" class="mr-2">
-                    <label for="file_{{ file.id }}" class="cursor-pointer">
-                        <span class="font-medium">{{ file.name }}</span>
-                    </label>
-                </li>
-                {% empty %}
-                <li class="my-2 text-gray-500">No files available.</li>
-                {% endfor %}
-            </ul>
+            {% include 'QuizGenWeb/show_files.html' %}
+            
         </div>
 
         <div class="my-4">
