@@ -170,9 +170,16 @@ html_template_raw = r"""
                 padding-left: 30px;
             }
         }
+        .head-name {
+            width: 45%;
+        }
+        .head-more {
+            width: 13%;
+        }
         </style>
     </head>
     <body>
+        <h4>Cognome Nome: <input type="text" class="head-name"> Classe: <input type="text" class="head-more"> Data: <input type="text" class="head-more"></h4>
         {% CONTENT %}
     </body>
 </html>"""

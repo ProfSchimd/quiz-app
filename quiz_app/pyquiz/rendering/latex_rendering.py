@@ -35,6 +35,8 @@ def html_to_latex(s: str) -> str:
     s = s.replace('<ul>', '\n\\begin{itemize}')
     s = s.replace('</li>', '\n')
     s = s.replace('<li>', '  \\item ')
+    s = s.replace('<pre>', '\n\\begin{verbatim}')
+    s = s.replace('</pre>', '\\end{verbatim}\n')
     return s
 
 
