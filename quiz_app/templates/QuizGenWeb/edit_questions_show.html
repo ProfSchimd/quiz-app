@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    {% for file in files %}
+    <h2 class="py-4 text-2xl">{{file.name}} ({{file.id}})</h2>
+    {% for question in file.questions %}
+    <div class="flex items-center justify-center p-2 seven:bg-slate-300 odd:bg-slate-200 dark:odd:bg-slate-900 dark:even:bg-slate-600">
+        {% include "components/question.html" with q=question %}
+        <a class="ml-auto" href="{% url 'edit_question' file=file.id qid=question.id %}"><i class="bi bi-pencil-square"></i></a>
+    </div>
+    {% endfor %}
+    {% empty %}
+    <span>No file select.</span>
+    {% endfor %}
+</div>
+{% endblock %}

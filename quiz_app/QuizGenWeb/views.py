@@ -141,3 +141,31 @@ def edit_select_files(request):
         "files": QuizFile.objects.all(),
     }
     return render(request, "QuizGenWeb/edit_file_select.html", context=context)
+
+def edit_show_questions(request):
+    if (not request.method == "POST") or (not request.POST.get("file_ids")) :
+        return redirect("edit_file_select")
+    selected_files=request.POST.getlist("file_ids")
+    files = []
+    for f in QuizFile.objects.filter(id__in=selected_files):
+        files.append({
+            "name": f.name,
+            "id": f.id,
+            "questions": pyquiz.json_to_questions(f.path)
+        })
+    context = {
+        "files": files
+    }
+    return render(request, "QuizGenWeb/edit_questions_show.html", context=context)
+
+def edit_question(request, file, qid):
+    if request.method == "POST":
+        print(request.POST)
+    context = {
+        "question": {
+            "q_id": qid,
+            "type": "single",
+            "options": [1,2,3],
+        }
+    }
+    return render(request, "QuizGenWeb/edit_question.html", context=context)

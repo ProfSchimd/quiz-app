@@ -1,0 +1,155 @@
+<div x-data="data" class="max-w-4xl mx-auto p-6 bg-white shadow rounded space-y-4">
+    <p class="flex flex-col">
+        <label for="q_id" class="text-sm font-semibold mb-1">Id:</label>
+        <input
+            type="text"
+            x-model:value="question.id"
+            name="q_id"
+            id="q_id"
+            @input="question.edit()"
+            disabled
+            class="rounded border border-gray-300 px-3 py-2 bg-gray-100 cursor-not-allowed"
+        >
+    </p>
+
+    <p class="flex flex-col">
+        <label for="q_type" class="text-sm font-semibold mb-1">Type:</label>
+        <span
+            x-text="question.type"
+            name="q_type"
+            id="q_type"
+            class="px-3 py-2 bg-gray-100 rounded border border-gray-300"
+        ></span>
+    </p>
+
+    <p class="flex flex-col">
+        <label for="q_text" class="text-sm font-semibold mb-1">Text:</label>
+        <input
+            type="text"
+            x-model:value="question.text"
+            name="q_text"
+            id="q_text"
+            @input="question.edit()"
+            class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+    </p>
+
+    <div>
+        <h3 class="font-semibold text-lg mb-2">Options</h3>
+        <ul class="space-y-2">
+            <template x-for="(opt, i) in question.options" :key="i">
+                <li class="flex items-center space-x-2">
+                    <input
+                        type="text"
+                        x-model="question.options[i]"
+                        :name="`q_option`"
+                        :id="`q_option_${i}`"
+                        @input="question.edit()"
+                        class="rounded border border-gray-300 px-2 py-1 flex-1"
+                    >
+                    <input
+                        type="radio"
+                        x-model="question.correct"
+                        :value="i"
+                        :name="`q_correct`"
+                        :id="`q_correct_${i}`"
+                        @input="question.edit()"
+                        class="accent-blue-500"
+                    >
+                    <input
+                        type="button"
+                        @click="question.removeOption(i)"
+                        value="-"
+                        class="px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
+                    >
+                </li>
+            </template>
+        </ul>
+        <input
+            type="button"
+            @click="question.addOption('')"
+            value="+"
+            class="mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+    </div>
+
+    <p class="flex flex-col">
+        <label for="q_weight" class="text-sm font-semibold mb-1">Weight:</label>
+        <input
+            type="number"
+            :value="question.weight"
+            :name="'q_weight'"
+            :id="'q_weight'"
+            @input="question.edit()"
+            class="rounded border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+    </p>
+
+    <div>
+        <h4 class="font-semibold">Tags:</h4>
+        <template x-for="t in question.tags" :key="t">
+            <code class="inline-block bg-gray-100 text-sm px-2 py-1 mr-2 rounded text-gray-700">#<span x-text="t"></span></code>
+        </template>
+    </div>
+
+    <p class="flex space-x-4">
+        <input
+            type="submit"
+            value="Save"
+            
+            :disabled="!question.unsaved"
+            class="px-4 py-2 bg-green-500 text-white rounded disabled:opacity-50 hover:bg-green-600"
+        >
+        <input
+            type="button"
+            @click="question.print()"
+            value="Print"
+            class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+        >
+    </p>
+</div>
+
+</body>
+{{ question|json_script:"q" }}
+<script>
+const q = JSON.parse(document.getElementById("q").textContent);
+document.addEventListener("alpine:init", () => {
+    console.log("Alpine init!");
+    Alpine.data("data", () => ({
+        question: {
+            id: q.q_id,
+            type: q.type,
+            text: 'Hello?',
+            options: q.options, 
+            correct: 0,
+            weight: 1,
+            
+            tags: ['A', 'B'],
+            addOption(optText) {
+                this.edit();
+                this.options.push(optText);
+            },
+            removeOption(idx) {
+                this.edit();
+                if (idx == this.correct) {
+                    this.correct = -1;
+                }
+                if (idx <= this.correct) {
+                    this.correct--;
+                }
+                this.options.splice(idx,1);
+            },
+            print() {
+                console.log(this);
+            },
+            edit() {
+                this.unsaved = true;
+            }, 
+            save() {
+                this.unsaved = false;
+            }
+            
+        }
+    }))
+})
+</script>

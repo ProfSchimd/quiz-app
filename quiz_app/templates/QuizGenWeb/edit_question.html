@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block extra_scripts %}
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+{% endblock %}
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    {% include "questions/single.html" %}
+    <input type="submit" value="submit">
+</form>
+{% endblock %}

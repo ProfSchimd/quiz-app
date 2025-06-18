@@ -9,4 +9,6 @@ urlpatterns = [
     path("wizard/confirm", views.wizard_confirm, name="wizard_confirm"),
     path("wizard/download", views.wizard_download, name="wizard_download"),
     path("edit/file", views.edit_select_files, name="edit_file_select"),
+    path("edit/questions", views.edit_show_questions, name="edit_questions_show"),
+    path("edit/<int:file>/<qid>/", views.edit_question, name="edit_question"),
 ]
