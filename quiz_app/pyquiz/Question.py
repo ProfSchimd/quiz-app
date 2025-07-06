@@ -4,32 +4,37 @@ import random
 class Question:
     """Contains basic feature of a Question."""
 
-    def __init__(self, id, text, weight, tags=[]):
+    def __init__(self, id, text, weight, tags=None):
         """Initialize Question."""
         self.id = id
         self._text = text
         self._weight = weight
-        self._tags = tags
+        self._tags = tags if tags is not None else []
         self._type = 'undefined'
 
 
     def __str__(self):
         return f'ID: {self.id} (W: {self._weight})'
+    
+    def to_dict(self): 
+        return {
+            "id": self.id,
+            "type": self._type,
+            "text": self._text,
+            "weight": self._weight,
+            "tags": self._tags,
+        }
  
 
 class DisplayQuestion(Question):
     """DisplayQuestion are those rendered."""
     
     def to_dict(self):
-        d = {
-            "id": self.id,
-            "type": self._type,
-            "weight": self._weight,
-            "text": self._text,
+        d = super().to_dict()
+        d.update({
             "options": self._options,
             "correct": self._correct,
-            "tags": self._tags    
-        }
+        })
         return d
 
 
@@ -39,7 +44,6 @@ class CheckboxQuestion(DisplayQuestion):
         self._options = options
         self._correct = correct
         if type is not None:
-            self._type = type
             self._type = "single" if type == "single" else "multiple"
         if tags is not None:
             self._tags = tags
@@ -112,9 +116,15 @@ class RawChoiceQuestion(RawQuestion):
         self._type = type
         if tags is not None:
             self._tags = tags
+            
+    def to_dict(self):
+        d = super().to_dict()
+        d["type"] = self._type # not sure if super().to_dict() chooses the correct one
+        d["options"] = self._options
+        d["correct"] = self._correct
+        return d
 
     def to_display_question(self):
- 
         text = None
         # Choose between versions (single -> 1, multiple -> 1, invertible -> 2, ...)
         variant = random.randint(0,len(self._text)-1)
@@ -157,6 +167,13 @@ class RawFillQuestion(RawQuestion):
         self._type = type
         if tags is not None:
             self._tags = tags
+            
+    def to_dict(self):
+        d = super().to_dict()
+        d["type"] = self._type
+        d["tofill"] = self._to_fill
+        d["correct"] = self._correct
+        return d
 
     def to_display_question(self):
         return FillQuestion(self.id, self._text, self._to_fill, self._weight, self._correct, self._type, self._tags)
@@ -170,6 +187,12 @@ class RawOpenQuestion(RawQuestion):
         super().__init__(id, text, weight)
         self._variants = variants
         self._type = type
+        
+    def to_dict(self):
+        d = super().to_dict()
+        d["type"] = self._type
+        d["variants"] = self._variants
+        return d
 
     def to_display_question(self):
         text = fill_alternative(self._text, self._variants)
@@ -186,6 +209,13 @@ class RawExerciseQuestion(RawQuestion):
         self._type = type
         self._text_variants = text_variants
         self._sub_questions = sub_questions
+        
+    def to_dict(self):
+        d = super().to_dict()
+        d["type"] = self._type
+        d["text-variants"] = self._text_variants
+        d["sub-questions"] = [sub_q.to_dict() for sub_q in self._sub_questions]
+        return d
         
 
     def to_display_question(self):
@@ -228,5 +258,5 @@ def fill_alternative(template, variants):
         n_opts = len(variants[i])
         choice = random.randint(0, n_opts-1)
         selected = variants[i][choice]
-        template = template.replace('{{' + str(i) + '}}', selected)
+        template = template.replace(f"{{{{{i}}}}}", selected)
     return template

@@ -126,6 +126,14 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def json_to_questions(json_file: Any) -> list:
+    """Parses a JSON file into a list of question dictionaries.
+
+    Args:
+        json_file (Any): path of the JSON file (string or Path)
+
+    Returns:
+        list: The parsed JSON (a list of dictionaries if the file is well formed) 
+    """
     questions = []
     if type(json_file) is str:
         json_file = pathlib.Path(json_file)
@@ -173,6 +181,71 @@ def parse_question_json(json_questions: list, filter: QuestionFilter = None) -> 
         filter = QuestionFilter()
     return [qst.RawQuestion.from_dict(q) for q in json_questions if filter.accepts(q)]
 
+
+def questions_to_json(questions: list, path: str, pretty_print=True):
+    """Saves the given list of Question object into a JSON file.
+
+    Args:
+        questions (list): the list of Question objects to save
+        path (str): the path of the JSON file
+        pretty_print (bool, optional): If set prints in human readable format. Defaults to True.
+    """
+    with open(path, "w") as fp:
+        indent = 4 if pretty_print else None
+        json.dump([q.to_dict() for q in questions], fp, indent=indent)
+        
+        
+def add_question_to_json(path: str, question: qst.Question, replace: bool=False):
+    questions = parse_question_json(json_to_questions(path))
+    # if replace, remove ALL questions with the same id as the inserted
+    if replace:
+        questions = [q for q in questions if q.id != question.id]
+    questions.append(question)
+    # print([q.id for q in questions])
+    questions_to_json(questions, path, True)
+
+def update_question_on_json(path: str, id: str, question: qst.Question, add_if_not_found=False) -> bool:
+    """Updates the question with given id from the file with indicated path. The provided Question entirely replaces the one if the given id (no incremental update). It is possible to add the question anew when id is not found.
+
+    Args:
+        path (str): The path of the JSON with the questions
+        id (str): id of the question to update
+        question (qst.Question): the question that will replace the updated one
+        add_if_not_found (bool, optional): If True, adds the given question if one with given id is not found. Defaults to False.
+
+    Returns:
+        bool: True if the operations updates or adds
+    """
+    questions = parse_question_json(json_to_questions(path))
+    for i, q in enumerate(questions):
+        if q.id == id:
+            questions[i] = question
+            break # substitute only the first one, if more are present
+    else: # append if not found (only if set in the options)
+        if add_if_not_found:
+            questions.append(question)
+        else:
+            return False
+    questions_to_json(questions, path)
+    return True
+
+def delete_from_json(path: str, id: str) -> bool:
+    """Deletes the question(s) with given id from the file with indicated path. Notice that if more questions with the given id are found, they are deleted. If no questions with the given id are found, the indicated file is untouched.
+
+    Args:
+        path (str): The path of the JSON file from which delete the question.
+        id (str): The id of the question to delete.
+
+    Returns:
+        bool: True if one or more questions are delete. False if no questions are delete.
+    """
+    questions = parse_question_json(json_to_questions(path))
+    new_questions = [q for q in questions if q.id != id]
+    if len(new_questions) < len(questions):
+        questions_to_json(questions, path)
+        return True
+    return False
+    
 
 def create_quiz(questions: list, count: int, shuffle: bool = True) -> list:
     quiz = [q.to_display_question() for q in questions]
@@ -327,3 +400,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+def dummy():
+    pass

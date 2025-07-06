@@ -1,11 +1,13 @@
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
 
-from . import pyquiz
-from .Question import Question
-from . import util
+
+import pyquiz.pyquiz as pyquiz
+import pyquiz.Question as qst
+import pyquiz.util as util
 
 
 class PyquizTest(unittest.TestCase):
@@ -56,6 +58,110 @@ class PyquizTest(unittest.TestCase):
         self.assertIn("001", ids, "Expected id not present")
         self.assertNotIn("123", ids, "Unexpected question id")
         
+    def test_question_to_json(self):
+        raw = json.loads(raw_json)
+        questions = [
+            qst.RawQuestion.from_dict(raw[0]).to_display_question(),
+            qst.RawQuestion.from_dict(raw[1]).to_display_question(),
+            qst.RawQuestion.from_dict(raw[2]).to_display_question(),
+        ]
+        path = tempfile.mktemp()
+        pyquiz.questions_to_json(questions, path)
+        with open(path) as fp:
+            loaded = json.load(fp)
+        os.remove(path)
+        
+        self.assertEqual(
+            set([q["id"] for q in loaded]),
+            set(q.id for q in questions),
+            "Set of id don't match",
+        )
+            
+    def test_add_question(self):
+        path = tempfile.mktemp()
+        original = json.loads(raw_json)
+        with open(path, "w") as fp:
+            fp.write(raw_json)
+        
+        pyquiz.add_question_to_json(path, extra_q_1)
+        with open(path) as fp:
+            loaded = json.load(fp)
+        os.remove(path)
+        
+        
+        self.assertEqual(
+            set([q["id"] for q in original]) | {extra_q_1.id},
+            set([q["id"] for q in loaded]),
+            "Set of id's don't match"
+        )
+        
+        self.assertIn(
+            extra_q_1.to_dict(),
+            loaded,
+            "Can't find whole added element"
+        )
+        
+    def test_add_with_replace(self):
+        path = tempfile.mktemp()
+        original = json.loads(raw_json)
+        with open(path, "w") as fp:
+            fp.write(raw_json)
+        pyquiz.add_question_to_json(path, extra_q_2, True)
+        with open(path) as fp:
+            loaded = json.load(fp)
+        os.remove(path)
+        self.assertEqual(
+            set([q["id"] for q in original]),
+            set([q["id"] for q in loaded]),
+            "Id sets don't correspond"
+        )
+
+    def test_update_question(self):
+        path = tempfile.mktemp()
+        old_q = json.loads(raw_json_2)
+        with open(path, "w") as fp:
+            json.dump(old_q, fp)
+        # create the updated version
+        new_q = qst.RawQuestion.from_dict(old_q[1])
+        new_q._text = "This is a brand new text for the question!"
+        # call update
+        pyquiz.update_question_on_json(path, new_q.id, new_q)
+        with open(path) as fp:
+            loaded = json.load(fp)
+        os.remove(path)
+        
+        inserted = next((d for d in loaded if d.get("id") == new_q.id), None)
+        self.assertIsNotNone(inserted, "Couldn't find updated id")
+        # verify correct update
+        self.assertEqual(
+            inserted["text"],
+            new_q._text,
+            "Didn't update 'text' field."
+        )
+        
+        # verify id set is not changed
+        self.assertEqual(
+            set([q["id"] for q in old_q]),
+            set([q["id"] for q in loaded]),
+            "Sets of id don't match"
+        )
+
+    def test_delete_question(self):
+        path = tempfile.mktemp()
+        old_q = json.loads(raw_json_2)
+        with open(path, "w") as fp:
+            json.dump(old_q, fp)
+        removed_id = old_q[-1]["id"]
+        pyquiz.delete_from_json(path, removed_id)
+        with open(path) as fp:
+            loaded = json.load(fp)
+        self.assertNotIn(
+            old_q[-1],
+            loaded,
+            "Question not deleted",
+        )    
+        os.remove(path)
+
 
 
 class RenderTest(unittest.TestCase):
@@ -78,9 +184,9 @@ class UtilTest(unittest.TestCase):
         )
 
     def test_similarity_matrix(self):
-        one = Question("001", "Text1", 1, ["A"])
-        two = Question("002", "Text11", 1, ["B"])
-        three = Question("003", "text111", 1, ["C"])
+        one = qst.Question("001", "Text1", 1, ["A"])
+        two = qst.Question("002", "Text11", 1, ["B"])
+        three = qst.Question("003", "text111", 1, ["C"])
 
         list = [[one, two], [two, three], [one, two]]
 
@@ -91,6 +197,25 @@ class UtilTest(unittest.TestCase):
             matrix[0][1], matrix[1][0], "Asymmetric matrix (0,1)!=(1,0)"
         )
 
+extra_q_1 = qst.RawChoiceQuestion.from_dict({
+    "id": "101",
+    "type": "single",
+    "text": "This is a test question",
+    "options": ["One", "Two", "Three"],
+    "correct": [0,1,0],
+    "weight": 1,
+    "tags": ["Test"],
+})
+
+extra_q_2 = qst.RawChoiceQuestion.from_dict({
+    "id": "001",
+    "type": "single",
+    "text": "This is a test question",
+    "options": ["One", "Two", "Three"],
+    "correct": [0,1,0],
+    "weight": 1,
+    "tags": ["Test"],
+})
 
 raw_json = """[
     {

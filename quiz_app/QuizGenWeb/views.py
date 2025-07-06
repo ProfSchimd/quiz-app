@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from pyquiz import pyquiz
 
 from .models import QuizFile
@@ -161,6 +161,10 @@ def edit_show_questions(request):
 def edit_question(request, file, qid):
     if request.method == "POST":
         print(request.POST)
+    quiz_file = get_object_or_404(QuizFile, pk=file)
+    print(quiz_file)
+    if not quiz_file:
+        print('ErRoR¡')
     context = {
         "question": {
             "q_id": qid,
