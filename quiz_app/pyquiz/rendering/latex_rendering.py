@@ -1,15 +1,5 @@
 from .. import util
 
-# TODO: In order to add 'exam' class support we need to make some changes to the code.
-# - (DONE) Add 'use_exam_class' flag that distinguished "standard" LaTeX and 'exam' class 
-# - (DONE) Template file for 'exam' class 
-# - Switch from \section to \question using points
-# - (DONE) Replace the multiple choice rendering: (i) itemize becomes (ii) use \choice and \CorrectChoice
-# - (DONE) Replace fill rendering to use \fillin
-# - (DONE) Implement solution with \printsolutions toggled
-# - Review the general layout of the resulting file
-# 
-
 fill_placeholder = ".................."
 
 
@@ -31,8 +21,10 @@ def html_to_latex(s: str) -> str:
     s = s.replace('<u>', '\\underline{')
     s = s.replace('</i>', '}')
     s = s.replace('<i>', '\\emph{')
-    s = s.replace('</ul>', '\\end{itemize}\n')
     s = s.replace('<ul>', '\n\\begin{itemize}')
+    s = s.replace('</ul>', '\\end{itemize}\n')
+    s = s.replace('<ol>', '\\begin{enumerate}')
+    s = s.replace('</ol>', '\\end{enumerate}\n')
     s = s.replace('</li>', '\n')
     s = s.replace('<li>', '  \\item ')
     s = s.replace('<pre>', '\n\\begin{verbatim}')
@@ -41,7 +33,6 @@ def html_to_latex(s: str) -> str:
 
 
 def latex_render_choices(q, use_exam_class=False):
-    
     list_environment = "itemize"
     if use_exam_class:
         list_environment = "checkboxes"
