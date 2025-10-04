@@ -176,10 +176,24 @@ html_template_raw = r"""
         .head-more {
             width: 13%;
         }
+        .alert-red {
+            border: 1px solid;
+            padding: 5px;
+            color: red
+        }
         </style>
     </head>
     <body>
         <h4>Cognome Nome: <input type="text" class="head-name"> Classe: <input type="text" class="head-more"> Data: <input type="text" class="head-more"></h4>
+        <div class="alert-red">
+			<h2>Regole di comportamento</h2>
+			<ul>
+				<li>È possibile usare il <u>proprio</u> quaderno degli appunti, ma non materiali esterni o strumenti di comunicazioni come chat, email o altro.</li>
+				<li>È vietato usare strumenti come ChatGPT, Gemini o simili.</li>
+				<li>Telefono e <u>tutti</u> i dispositivi elettronici vanno tenuti spenti nello zaino.</li>
+				<li>Nel caso si venisse sorpresi a violare una delle regole sopra: la prova verrà annullata con valutazione <b>2</b> sul registro elettronico e con nota disciplinare indicante il motivo del voto. In tal caso <u>non è prevista alcuna prova di recupero del voto</u>.</li>
+			</ul>
+		</div>
         {% CONTENT %}
     </body>
 </html>"""
