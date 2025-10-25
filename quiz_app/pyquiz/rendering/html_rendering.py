@@ -4,15 +4,22 @@ fill_placeholder ='<input type="textbox" style="padding: 1px">'
 def question_header(i):
     return f'<h2>Domanda {i}</h2>\n'
 
+def html_render_figures(figures, div_class="figure"):
+    str = ""
+    for fig in figures:
+        str += f'<div class="{div_class}">\n  <img src="{fig.url}">\n  <span>{fig.caption}</span>\n</div>\n'
+    return str
+
 def html_render_choices(q):
     content_text = ''
     content_solution = ''
     text = q._text
     options = q._options
     correct = q._correct
+    figures = html_render_figures(q._figures)
 	
-    content_text += f'<p>{text}</p>\n'
-    content_solution += f'<p>{text}</p>\n'
+    content_text += f'<p>{text}</p>{figures}\n'
+    content_solution += f'<p>{text}</p>{figures}\n'
     
     for j in range(len(options)):
         opt = f'<p class="option"><input type="checkbox" id="ans-{j}">\n<label for="ans-{j}">{options[j]}</label></p>'
@@ -27,16 +34,18 @@ def html_render_choices(q):
     return content_text, content_solution
 
 def html_render_open(q):
-    content_text = q._text
-    content_solution = q._text
+    figures = html_render_figures(q._figures)
+    content_text = f"<div>{q._text}</div>\n{figures}"
+    content_solution = f"<div>{q._text}</div>\n{figures}"
     return content_text, content_solution
     
 def html_render_fill(q):
     content_text = ''
     content_solution = ''
     correct = q._correct
-    content_text += f'<p>{q._text}</p>\n\n'
-    content_solution += f'<p>{q._text}</p>\n\n'
+    figures = html_render_figures(q._figures)
+    content_text += f'<p>{q._text}</p>{figures}\n\n'
+    content_solution += f'<p>{q._text}</p>{figures}\n\n'
     to_fill = q._to_fill
     sol_filled = to_fill
     for j in range(len(correct)):
@@ -49,8 +58,9 @@ def html_render_fill(q):
     return content_text, content_solution
 
 def html_render_exercise(q):
-    content_text = q._text
-    content_solution = q._text
+    figures = html_render_figures(q._figures)
+    content_text = f"<div>{q._text}</div>\n{figures}"
+    content_solution = f"<div>{q._text}</div>\n{figures}"
     
     content_text += '<ol>\n'
     content_solution += '<ol>\n'
@@ -63,8 +73,9 @@ def html_render_exercise(q):
     return content_text, content_solution
 
 def html_render_composite(q, heading='Esercizio'):
-    text = q._text + '\n'
-    solution = q._text + '\n'
+    figures = html_render_figures(q._figures)
+    text = f"<div>{q._text}</div>\n{figures}"
+    solution = f"<div>{q._text}</div>\n{figures}"
     i = 1
     for sub_q in q._questions:
         score = f'({sub_q._weight} Punti)'

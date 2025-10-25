@@ -113,8 +113,8 @@ class ExerciseQuestion(DisplayQuestion):
 
 
 class CompositeQuestion(DisplayQuestion):
-    def __init__(self, id, text, weight, questions, type=None):
-        super().__init__(id, text, weight)
+    def __init__(self, id, text, weight, questions, type=None, figures=None):
+        super().__init__(id, text, weight, figures=figures)
         self._questions = questions
         self._type = type if type else self._type
 
@@ -157,7 +157,7 @@ class RawChoiceQuestion(RawQuestion):
     def __init__(
         self, id, text, weight, options, correct, type="single", tags=None, figures=None
     ):
-        super().__init__(id, text, weight)
+        super().__init__(id, text, weight, figures=figures)
         self._options = options
         self._correct = correct
         self._type = type
@@ -169,6 +169,7 @@ class RawChoiceQuestion(RawQuestion):
         d["type"] = self._type  # not sure if super().to_dict() chooses the correct one
         d["options"] = self._options
         d["correct"] = self._correct
+        
         return d
 
     def to_display_question(self):
