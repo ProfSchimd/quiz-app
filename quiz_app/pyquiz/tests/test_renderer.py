@@ -75,3 +75,34 @@ class TestHtmlRenderFigures(unittest.TestCase):
         
         # Count number of figure divs
         self.assertEqual(result.count('<div class="figure">'), 3)
+        
+        
+class TestLatexRenderFigures(unittest.TestCase):
+    """Test suite for latex_render_figures function."""
+    
+    def test_empty_figures_list(self):
+        """Test that empty list returns empty string."""
+        result = latex.latex_render_figures([])
+        self.assertEqual(result, '')
+        
+    def test_single_figure_with_caption(self):
+        """Test rendering a single figure with caption."""
+        figures = [qst.Figure(url='images/graph.png', caption='Population growth over time')]
+        result = latex.latex_render_figures(figures)
+        
+        # Check for LaTeX figure environment
+        self.assertIn('\\begin{figure}', result)
+        self.assertIn('\\end{figure}', result)
+        self.assertIn('\\includegraphics', result)
+        self.assertIn('\\caption{Population growth over time}', result)
+        self.assertIn('images/graph.png', result)
+        
+    def test_single_figure_without_caption(self):
+        """Test rendering a figure without caption."""
+        figures = [qst.Figure(url='diagram.pdf', caption='')]
+        result = latex.latex_render_figures(figures)
+        
+        self.assertIn('\\includegraphics', result)
+        self.assertIn('diagram.pdf', result)
+        # Should NOT contain \caption command
+        self.assertNotIn('\\caption', result)

@@ -9,6 +9,20 @@ def question_header(i: int, header_text: str="Domanda", use_exam_class: bool=Fal
     return f'\n\\subsection*{{{header_text} {i}}}\n'
 
 
+def latex_render_figures(figures):
+    rendered = ""
+    for fig in figures:
+        caption = f"\\caption{{{fig.caption}}}" if fig.caption else ""
+        rendered += f'''\\begin{{figure}}[!h]
+\\begin{{center}}
+\\includegraphics[width=0.5\\textwidth]{{{fig.url}}}
+{caption}
+\\end{{center}}
+\\end{{figure}}
+'''
+    return rendered
+
+
 def html_to_latex(s: str) -> str:
     s = s.replace('</code>', '}')
     s = s.replace('<code>', '\\texttt{')
@@ -29,6 +43,8 @@ def html_to_latex(s: str) -> str:
     s = s.replace('<li>', '  \\item ')
     s = s.replace('<pre>', '\n\\begin{verbatim}')
     s = s.replace('</pre>', '\\end{verbatim}\n')
+    # Special characters escaping
+    s = s.replace('%', '\\%')
     return s
 
 
@@ -40,9 +56,11 @@ def latex_render_choices(q, use_exam_class=False):
     text = q._text
     options = q._options
     correct = q._correct
+    
+    figures = latex_render_figures(q._figures)
 	
-    content_text = f'{html_to_latex(text)}\n\\begin{{{list_environment}}}\n'
-    content_solution = f'{html_to_latex(text)}\n\\begin{{{list_environment}}}\n'
+    content_text = f'{html_to_latex(text)}\n{figures}\n\\begin{{{list_environment}}}\n'
+    content_solution = f'{html_to_latex(text)}\n{figures}\n\\begin{{{list_environment}}}\n'
     for j, o in enumerate(options):
         if use_exam_class:
             content_text += '  \\CorrectChoice ' if correct[j] == 1 else '  \\choice ' 
@@ -62,8 +80,9 @@ def latex_render_choices(q, use_exam_class=False):
 
 
 def latex_render_fill(q, use_exam_class=False):
-    content_text = f'{html_to_latex(q._text)}\n\n\\noindent\n'
-    content_solution = f'{html_to_latex(q._text)}\n\n\\noindent\n'
+    figures = latex_render_figures(q._figures)
+    content_text = f'{html_to_latex(q._text)}\n{figures}\n\n\\noindent\n'
+    content_solution = f'{html_to_latex(q._text)}\n{figures}\n\n\\noindent\n'
     to_fill = html_to_latex(q._to_fill)
     # in case of code block we better use verbatim environment
     # it is important to check the original _to_fill since the
@@ -95,8 +114,9 @@ def latex_render_open(q, use_exam_class=False):
 def latex_render_exercise(q, use_exam_class=False):
     environment = "parts" if use_exam_class  else "enumerate"
     item = "part" if use_exam_class else "item"
-    content_text = f'{html_to_latex(q._text)}\n\\begin{{{environment}}}\n'
-    content_solution = f'{html_to_latex(q._text)}\n\\begin{{{environment}}}\n'
+    figures = latex_render_figures(q._figures)
+    content_text = f'{html_to_latex(q._text)}\n{figures}\n\\begin{{{environment}}}\n'
+    content_solution = f'{html_to_latex(q._text)}\n{figures}\n\\begin{{{environment}}}\n'
     for sub_q in q._sub_questions:
         sub_q = html_to_latex(sub_q)
         content_text += f'\\{item} {sub_q}\n'
@@ -108,8 +128,9 @@ def latex_render_exercise(q, use_exam_class=False):
 
 
 def latex_render_composite(q, heading="Esercizio", use_exam_class=False):
-    text = html_to_latex(q._text) + '\n'
-    solution = html_to_latex(q._text) + '\n'
+    figures = latex_render_figures(q._figures)
+    text = f"{html_to_latex(q._text)}\n{figures}\n"
+    solution = f"{html_to_latex(q._text)}\n{figures}\n"
     for i, sub_q in enumerate(q._questions,1):
         text += f'\\subsection*{{{heading} {i} ({sub_q._weight} Punti)}}\n'
         solution += f'\\subsection*{{{heading} {i} ({sub_q._weight} Punti)}}\n'
@@ -183,6 +204,7 @@ latex_template_raw = r"""
 % \renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
 \usepackage{amssymb}
 \usepackage{array}
+\usepackage{graphicx}
 \usepackage{fancyhdr}
 \renewcommand{\headrulewidth}{0pt}
 
