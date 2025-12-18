@@ -36,8 +36,7 @@
             <div class="mb-4">
                 <label for="id_seed" class="block text-lg font-medium">Seed</label>
                 <input type="number" id="id_seed" name="seed" value="{{ seed|default:'' }}"
-                    class="text-gray-900 dark:text-slate-900 w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
-                <small class="text-gray-500 dark:text-gray-400">Integer value for seeding randomization. Default is no seeding.</small>
+                    class="text-gray-900 dark:text-slate-900 w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500 value for seeding randomization. Default is no seeding.</small>
             </div>
 
             <!-- --render -->
@@ -45,10 +44,10 @@
                 <label for="id_render" class="block text-lg font-medium">Render Type</label>
                 <select id="id_render" name="render"
                     class="text-gray-900 dark:text-slate-900 w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
-                    <option value="latex-exam">Latex Exam</option>
-                    <option value="latex">Latex</option>
-                    <option value="html">HTML</option>
-                    <option value="text">Text</option>
+                    <option value="latex-exam" {% if not render or render == "latex-exam"%}selected="selected"{% endif %}>Latex Exam</option>
+                    <option value="latex" {% if render == "latex" %}selected="selected"{% endif %}>Latex</option>
+                    <option value="html" {% if render == "html" %}selected="selected"{% endif %}>HTML</option>
+                    <option value="text" {% if render == "text" %}selected="selected"{% endif %}>Text</option>
                 </select>
                 <small class="text-gray-500 dark:text-gray-400">Defines the rendering type. Default is "latex".</small>
             </div>
@@ -56,7 +55,7 @@
             <!-- --render-meta -->
             <div class="mb-4">
                 <label class="flex items-center">
-                    <input type="checkbox" id="id_render_meta" name="render_meta" class="mr-2">
+                    <input type="checkbox" id="id_render_meta" name="render_meta" class="mr-2" checked>
                     <span>Render Meta Information</span>
                 </label>
                 <small class="text-gray-500 dark:text-gray-400">If activated, renders meta information in the quiz.</small>
@@ -78,8 +77,8 @@
                 <!-- --output -->
                 <div class="mb-4">
                     <label for="id_output" class="block text-lg font-medium">Output File Name</label>
-                    <input type="text" id="id_output" name="output" value="text"
-                        class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                    <input type="text" id="id_output" name="text" value="text"
+                        class="text-gray-900 dark:text-slate-900 w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
                     <small class="text-gray-500 dark:text-gray-400">Name of the output file (without extension). Default is "text".</small>
                 </div>
 
@@ -87,7 +86,7 @@
                 <div class="mb-4">
                     <label for="id_solution" class="block text-lg font-medium">Solution File Name</label>
                     <input type="text" id="id_solution" name="solution" value="solution"
-                        class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                        class="text-gray-900 dark:text-slate-900 w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
                     <small class="text-gray-500 dark:text-gray-400">Name of the solution file (without extension). Default is
                         "solution".</small>
                 </div>
@@ -97,7 +96,7 @@
                 <div class="mb-4">
                     <label for="id_template" class="block text-lg font-medium">Template File</label>
                     <input type="text" id="id_template" name="template"
-                        class="w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
+                        class="text-gray-900 dark:text-slate-900 w-full border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500">
                     <small class="text-gray-500 dark:text-gray-400">Indicates the template file.</small>
                 </div>
 

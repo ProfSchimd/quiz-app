@@ -33,9 +33,31 @@
                     Renderer (<code>--renderer</code>): {{ render }}
                     <input type="hidden" name="render" value="{{ render }}">
                 </li>
+                <li>
+                    Render metadata (<code>--render-meta</code>): {{ render_meta }}
+                    <input type="hidden" name="render_meta" value="{{ render_meta|default:'' }}">
+                </li>
+                <li>
+                    Include hidden (<code>--include-hidden</code>): {{ include_hidden }}
+                    <input type="hidden" name="include_hidden" value="{{ include_hidden|default:'' }}">
+                </li>
+                <li>
+                    Text prefix name (<code>--output</code>): {{ text }}
+                    <input type="hidden" name="text" value="{{ text }}">
+                </li>
+                <li>
+                    Solution prefix name (<code>--solution</code>): {{ solution }}
+                    <input type="hidden" name="solution" value="{{ solution }}">
+                </li>
+                <li>
+                    Template prefix name (<code>--template</code>): {{ template }}
+                    <input type="hidden" name="template" value="{{ template }}">
+                </li>
             </ul>
         </div>
-        <button class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 a:ring-cyan-200 font-medium rounded-lg text-sm mx-1 p-3 text-center" role="button" type="submit">Confirm</button>
+        <button
+            class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 a:ring-cyan-200 font-medium rounded-lg text-sm mx-1 p-3 text-center"
+            role="button" type="submit">Confirm</button>
     </form>
 </div>
 {% endblock %}

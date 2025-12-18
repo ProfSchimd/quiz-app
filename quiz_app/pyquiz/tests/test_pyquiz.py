@@ -65,7 +65,7 @@ class PyquizTest(unittest.TestCase):
             qst.RawQuestion.from_dict(raw[1]).to_display_question(),
             qst.RawQuestion.from_dict(raw[2]).to_display_question(),
         ]
-        path = tempfile.mktemp()
+        _, path = tempfile.mkstemp()
         pyquiz.questions_to_json(questions, path)
         with open(path) as fp:
             loaded = json.load(fp)
@@ -78,7 +78,7 @@ class PyquizTest(unittest.TestCase):
         )
             
     def test_add_question(self):
-        path = tempfile.mktemp()
+        _, path = tempfile.mkstemp()
         original = json.loads(raw_json)
         with open(path, "w") as fp:
             fp.write(raw_json)
@@ -102,7 +102,7 @@ class PyquizTest(unittest.TestCase):
         )
         
     def test_add_with_replace(self):
-        path = tempfile.mktemp()
+        _, path = tempfile.mkstemp()
         original = json.loads(raw_json)
         with open(path, "w") as fp:
             fp.write(raw_json)
@@ -117,7 +117,7 @@ class PyquizTest(unittest.TestCase):
         )
 
     def test_update_question(self):
-        path = tempfile.mktemp()
+        _, path = tempfile.mkstemp()
         old_q = json.loads(raw_json_2)
         with open(path, "w") as fp:
             json.dump(old_q, fp)
@@ -147,7 +147,7 @@ class PyquizTest(unittest.TestCase):
         )
 
     def test_delete_question(self):
-        path = tempfile.mktemp()
+        _, path = tempfile.mkstemp()
         old_q = json.loads(raw_json_2)
         with open(path, "w") as fp:
             json.dump(old_q, fp)

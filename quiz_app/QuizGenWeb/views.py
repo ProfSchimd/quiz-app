@@ -1,12 +1,9 @@
+import json
+import os
 from django.shortcuts import get_object_or_404, redirect, render
 from pyquiz import pyquiz
 
 from .models import QuizFile
-
-
-def index(request):
-    return render(request=request, template_name="QuizGenWeb/index.html")
-
 
 def process_file(file):
     questions = pyquiz.load_questions([file.path])
@@ -25,8 +22,13 @@ def process_file(file):
         },
     }
 
+def index(request):
+    return render(request=request, template_name="QuizGenWeb/index.html")
+
 
 def wizard_files(request):
+    """View where JSON files are selected
+    """
     # Load selected files from the session
     selected_files = request.session.get("selected_files", [])
     selected_file_ids = set([int(i) for i in selected_files])
@@ -62,8 +64,14 @@ def wizard_params(request):
         context = {
             "selected_files": selected_files,
             "n": request.session.get("n") or None,
-            "tracks": request.session.get("n") or None,
+            "tracks": request.session.get("tracks") or None,
             "seed": request.session.get("seed") or None,
+            "render": request.session.get("render") or None,
+            "render_meta": request.session.get("render_meta") or False,
+            "include_hidden": request.session.get("include_hidden") or False,
+            "text": request.session.get("text") or None,
+            "solution": request.session.get("solution") or None,
+            "template": request.session.get("template") or None,
         }
         return render(
             request=request,
@@ -89,11 +97,21 @@ def wizard_confirm(request):
             "tracks": int(request.POST.get("tracks", 1)),
             "seed": request.POST.get("seed"),
             "render": request.POST.get("render"),
+            "render_meta": request.POST.get("render_meta"),
+            "include_hidden": request.POST.get("include_hidden"),
+            "text": request.POST.get("text"),
+            "solution": request.POST.get("solution"),
+            "template": request.POST.get("template"),
         }
         request.session["n"] = context["n"]
         request.session["tracks"] = context["tracks"]
         request.session["seed"] = context["seed"]
         request.session["render"] = context["render"]
+        request.session["render_meta"] = context["render_meta"]
+        request.session["include_hidden"] = context["include_hidden"]
+        request.session["text"] = context["text"]
+        request.session["template"] = context["template"]
+
         return render(
             request=request,
             template_name="QuizGenWeb/wizard_confirm.html",
@@ -105,29 +123,33 @@ def wizard_confirm(request):
 def wizard_download(request):
     if request.method == "POST":
         # Create a destination directory, prepare args, and use pyquiz
-        # script from the CLI app.
+        # script from the CLI app
+        destination_dir = "/tmp"
         selected_file_ids = request.POST.getlist("file_ids")
         selected_files = QuizFile.objects.filter(id__in=selected_file_ids)
         args = {
             "input": [file.path for file in selected_files],
-            "destination": "/tmp",
+            "destination": destination_dir,
             "n": int(request.POST.get("n")),
             "seed": request.POST.get("seed"),
             "tracks": int(request.POST.get("tracks")),
             "render": request.POST.get("render"),
-            "output": "text",
-            "solution": "solution",
+            "output": request.POST.get("text"),
+            "solution": request.POST.get("solution"),
             "template": None,
-            "render_meta": False,
-            "include_hidden": False,
+            "render_meta": bool(request.POST.get("render_meta")),
+            "include_hidden": bool(request.POST.get("include_hidden")),
             "test": 0,
             "verbosity": 0, 
         }
         from argparse import Namespace
         ns = Namespace(**args)
         info = pyquiz.run(ns)
-        pyquiz.print_output(info, 3, "/tmp/info.txt")
-        context = {}
+        pyquiz.print_output(info, 3, os.path.join(destination_dir, "info.txt"))
+        with open(os.path.join(destination_dir, "config.json"), "w") as fp:
+            json.dump(args, fp)
+        context = {         
+        }
         return render(
             request=request,
             template_name="QuizGenWeb/wizard_download.html",
