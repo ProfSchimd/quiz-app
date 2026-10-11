@@ -192,6 +192,14 @@ html_template_raw = r"""
             padding: 5px;
             color: red
         }
+        .figure {
+            max-width: 400px;
+            max-height: 400px;
+
+        }
+        .figure img {
+            width: 100%;
+        }
         </style>
     </head>
     <body>

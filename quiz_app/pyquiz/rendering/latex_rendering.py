@@ -1,11 +1,10 @@
-from .. import util
-
 fill_placeholder = ".................."
 
 
 def question_header(i: int, header_text: str="Domanda", use_exam_class: bool=False) -> str:
     if use_exam_class:
-        return '\n\\question\n'
+        return '\n\\question[2]\n'
+        # return '\n\\titledquestion[2]\n'
     return f'\n\\subsection*{{{header_text} {i}}}\n'
 
 
@@ -26,7 +25,7 @@ def latex_render_figures(figures):
 def html_to_latex(s: str) -> str:
     s = s.replace('</code>', '}')
     s = s.replace('<code>', '\\texttt{')
-    s = s.replace('<br>', '\\\\')
+    s = s.replace('<br>', '\\\\ ')
     s = s.replace('</strong>', '}')
     s = s.replace('<strong>', '\\textbf{')
     s = s.replace('</b>', '}')
@@ -41,8 +40,8 @@ def html_to_latex(s: str) -> str:
     s = s.replace('</ol>', '\\end{enumerate}\n')
     s = s.replace('</li>', '\n')
     s = s.replace('<li>', '  \\item ')
-    s = s.replace('<pre>', '\n\\begin{verbatim}')
-    s = s.replace('</pre>', '\\end{verbatim}\n')
+    s = s.replace('<pre>', '\n\\begin{verbatim}\n')
+    s = s.replace('</pre>', '\n\\end{verbatim}\n')
     # Special characters escaping
     s = s.replace('%', '\\%')
     return s
@@ -84,14 +83,16 @@ def latex_render_fill(q, use_exam_class=False):
     content_text = f'{html_to_latex(q._text)}\n{figures}\n\n\\noindent\n'
     content_solution = f'{html_to_latex(q._text)}\n{figures}\n\n\\noindent\n'
     to_fill = html_to_latex(q._to_fill)
+    # Block of codes should be written with <pre> blocks
+    # The below override should not be necessary anymore
     # in case of code block we better use verbatim environment
     # it is important to check the original _to_fill since the
     # to_fill was cleaned by the above call
-    if util.is_code_block(q._to_fill):
-        to_fill = q._to_fill \
-            .replace('<code>', '\\begin{verbatim}\n') \
-            .replace('</code>', '\n\\end{verbatim}\n') \
-            .replace('<br>', '\n')
+    # if util.is_code_block(q._to_fill):
+    #     to_fill = q._to_fill \
+    #         .replace('<code>', '\\begin{verbatim}\n') \
+    #         .replace('</code>', '\n\\end{verbatim}\n') \
+    #         .replace('<br>', '\n')
     sol_filled = to_fill
     for j, c in enumerate(q._correct):
         if use_exam_class:

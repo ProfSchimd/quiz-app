@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizForge — JSON Question Editor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f13;
+    --surface: #16181f;
+    --surface2: #1e2029;
+    --border: #2a2d3a;
+    --accent: #f0c040;
+    --accent2: #5b8ef0;
+    --danger: #e05a5a;
+    --success: #4fc48a;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--text); }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: #0e0f13; }
+  .btn-primary:hover { background: #ffd060; transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+  .btn-danger:hover { background: var(--danger); color: white; }
+  .btn-success { background: var(--success); color: #0e0f13; }
+  .btn-success:hover { background: #6fd9a0; }
+  .btn-blue { background: var(--accent2); color: white; }
+  .btn-blue:hover { background: #7aaaf5; }
+
+  .main {
+    display: grid;
+    grid-template-columns: 220px 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Left panel: question list */
+  .panel-left {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .q-count {
+    background: var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .q-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 6px;
+  }
+  .q-item {
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.12s;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .q-item:hover { background: var(--surface2); border-color: var(--border); }
+  .q-item.active { background: rgba(240,192,64,0.08); border-color: var(--accent); }
+  .q-item-id {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .q-item-type {
+    font-size: 10px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .q-item-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+  .tag {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  .tag.accent { background: rgba(91,142,240,0.15); color: var(--accent2); }
+
+  .add-btn-wrap { padding: 8px 6px; border-top: 1px solid var(--border); }
+
+  /* Center panel: editor form */
+  .panel-center {
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .editor-area {
+    overflow-y: auto;
+    flex: 1;
+    padding: 16px;
+  }
+  .field-group {
+    margin-bottom: 16px;
+  }
+  label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 7px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+    border-color: var(--accent2);
+  }
+  select option { background: var(--surface2); }
+  textarea { resize: vertical; min-height: 60px; font-family: var(--sans); }
+
+  .text-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .text-row textarea { flex: 1; min-height: 44px; }
+  .text-row-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    padding-top: 8px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  .option-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 6px 8px;
+    background: var(--surface);
+    border-radius: 5px;
+    border: 1px solid var(--border);
+  }
+  .option-row input[type="text"] { flex: 1; background: transparent; border: none; padding: 4px 6px; }
+  .option-row input[type="text"]:focus { outline: none; }
+  .correct-toggle {
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    color: var(--muted);
+  }
+  .correct-toggle.correct {
+    background: rgba(79,196,138,0.15);
+    border-color: var(--success);
+    color: var(--success);
+  }
+  .opt-remove {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: color 0.12s;
+  }
+  .opt-remove:hover { color: var(--danger); }
+
+  .fill-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 6px 8px;
+    background: var(--surface);
+    border-radius: 5px;
+    border: 1px solid var(--border);
+  }
+  .fill-idx {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    min-width: 18px;
+    text-align: center;
+  }
+  .fill-row input[type="text"] { flex: 1; background: transparent; border: none; padding: 4px 6px; }
+
+  .tags-input-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 6px 8px;
+    min-height: 36px;
+    cursor: text;
+  }
+  .tags-input-wrap:focus-within { border-color: var(--accent2); }
+  .tag-chip {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(91,142,240,0.15);
+    color: var(--accent2);
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .tag-chip-x { background: none; border: none; color: var(--accent2); cursor: pointer; font-size: 13px; line-height: 1; padding: 0 1px; }
+  .tag-chip-x:hover { color: var(--danger); }
+  .tags-input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 12px;
+    padding: 2px 4px;
+    min-width: 60px;
+    flex: 1;
+  }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 10px;
+    color: var(--muted);
+  }
+  .empty-icon { font-size: 40px; opacity: 0.3; }
+
+  /* Right panel: JSON + Preview */
+  .panel-right {
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  .panel-tab {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.12s;
+    border: none;
+    background: none;
+  }
+  .panel-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+  .panel-tab:hover:not(.active) { color: var(--text); }
+
+  .tab-content { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+  .tab-content.active { display: flex; }
+
+  #json-textarea {
+    flex: 1;
+    resize: none;
+    border: none;
+    border-radius: 0;
+    padding: 14px 16px;
+    background: var(--bg);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: #a8d8a8;
+    outline: none;
+    width: 100%;
+  }
+
+  .error-banner {
+    background: rgba(224,90,90,0.1);
+    border-top: 1px solid var(--danger);
+    color: var(--danger);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 8px 14px;
+    display: none;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  .error-banner.show { display: flex; }
+  .error-banner pre { white-space: pre-wrap; word-break: break-all; }
+
+  /* Preview */
+  .preview-area {
+    overflow-y: auto;
+    flex: 1;
+    padding: 16px;
+  }
+  .preview-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .toggle-solved {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--muted);
+    user-select: none;
+  }
+  .toggle-track {
+    width: 34px; height: 18px;
+    background: var(--border);
+    border-radius: 9px;
+    position: relative;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .toggle-track.on { background: var(--success); }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.2s;
+  }
+  .toggle-track.on .toggle-thumb { left: 18px; }
+
+  .preview-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    line-height: 1.75;
+  }
+  .preview-q-id {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .preview-type-badge {
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--border);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .preview-text {
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 14px;
+    line-height: 1.7;
+  }
+  .preview-options { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .preview-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background: var(--surface2);
+    border: 1.5px solid transparent;
+    transition: all 0.15s;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .preview-option.correct-opt { border-color: var(--success); background: rgba(79,196,138,0.07); }
+  .preview-option.wrong-opt { border-color: var(--danger); background: rgba(224,90,90,0.07); opacity: 0.7; }
+  .opt-indicator {
+    width: 18px; height: 18px;
+    border-radius: 3px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    margin-top: 1px;
+  }
+  .opt-indicator.correct-ind { border-color: var(--success); background: rgba(79,196,138,0.2); color: var(--success); }
+  .opt-indicator.wrong-ind { border-color: var(--danger); background: rgba(224,90,90,0.1); color: var(--danger); }
+
+  .preview-fill-text { font-size: 14px; color: var(--text); line-height: 2; }
+  .fill-blank {
+    display: inline-block;
+    min-width: 80px;
+    border-bottom: 2px solid var(--accent2);
+    padding: 0 4px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent2);
+    background: rgba(91,142,240,0.08);
+    border-radius: 3px 3px 0 0;
+    margin: 0 2px;
+  }
+  .fill-blank.solved { color: var(--success); border-color: var(--success); background: rgba(79,196,138,0.08); }
+
+  .no-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--muted);
+    gap: 8px;
+  }
+  code {
+    background: rgba(240,192,64,0.1);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.9em;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  .section-divider {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 0 6px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--success);
+    color: var(--success);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .drag-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(240,192,64,0.07);
+    border: 3px dashed var(--accent);
+    z-index: 9998;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 20px;
+    color: var(--accent);
+  }
+  .drag-overlay.show { display: flex; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Quiz<span>Forge</span></div>
+  <div style="width:1px;height:20px;background:var(--border);"></div>
+  <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()">📂 Load JSON</button>
+  <input type="file" id="file-input" accept=".json" style="display:none">
+  <button class="btn btn-primary" onclick="addQuestion()">＋ Add Question</button>
+  <button class="btn btn-success" onclick="downloadJSON()">⬇ Download</button>
+  <div style="flex:1"></div>
+  <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">Drag & drop JSON anywhere</span>
+</div>
+
+<div class="main">
+  <!-- Left: question list -->
+  <div class="panel-left">
+    <div class="panel-title">
+      Questions
+      <span class="q-count" id="q-count">0</span>
+    </div>
+    <div class="q-list" id="q-list"></div>
+    <div class="add-btn-wrap">
+      <button class="btn btn-secondary" style="width:100%" onclick="addQuestion()">＋ New Question</button>
+    </div>
+  </div>
+
+  <!-- Center: editor -->
+  <div class="panel-center">
+    <div class="panel-title">
+      Editor
+      <span id="editing-id" style="color:var(--accent);font-size:11px;"></span>
+    </div>
+    <div class="editor-area" id="editor-area">
+      <div class="empty-state">
+        <div class="empty-icon">✏️</div>
+        <div style="font-family:var(--mono);font-size:12px;">Select a question to edit</div>
+        <div style="font-size:12px;color:var(--muted);">or load a JSON file</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: JSON + Preview -->
+  <div class="panel-right">
+    <div class="panel-tabs">
+      <button class="panel-tab active" onclick="switchTab('json')">JSON</button>
+      <button class="panel-tab" onclick="switchTab('preview')">Preview</button>
+    </div>
+
+    <!-- JSON tab -->
+    <div class="tab-content active" id="tab-json">
+      <textarea id="json-textarea" spellcheck="false" placeholder="Paste JSON here or load a file..."></textarea>
+      <div class="error-banner" id="error-banner">
+        <span>⚠</span>
+        <pre id="error-msg"></pre>
+      </div>
+    </div>
+
+    <!-- Preview tab -->
+    <div class="tab-content" id="tab-preview">
+      <div class="preview-header">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;">Preview</span>
+        <label class="toggle-solved" id="solved-toggle" onclick="toggleSolved()">
+          <div class="toggle-track" id="toggle-track">
+            <div class="toggle-thumb"></div>
+          </div>
+          Show Answers
+        </label>
+      </div>
+      <div class="preview-area" id="preview-area">
+        <div class="no-preview">
+          <div style="font-size:32px;opacity:0.3">👁</div>
+          <div style="font-family:var(--mono);font-size:12px;">Select a question to preview</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="drag-overlay" id="drag-overlay">Drop JSON file here</div>
+<div class="toast" id="toast"></div>
+
+<script>
+let questions = [];
+let selectedIndex = -1;
+let showSolved = false;
+let suppressJsonSync = false;
+
+// ===================== INIT =====================
+const jsonTextarea = document.getElementById('json-textarea');
+const errorBanner = document.getElementById('error-banner');
+const errorMsg = document.getElementById('error-msg');
+
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) loadFile(file);
+  e.target.value = '';
+});
+
+jsonTextarea.addEventListener('input', () => {
+  const val = jsonTextarea.value.trim();
+  if (!val) { questions = []; renderList(); clearEditor(); return; }
+  parseAndSync();
+});
+
+// Drag & drop
+document.addEventListener('dragover', e => { e.preventDefault(); document.getElementById('drag-overlay').classList.add('show'); });
+document.addEventListener('dragleave', e => { if (!e.relatedTarget) document.getElementById('drag-overlay').classList.remove('show'); });
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  document.getElementById('drag-overlay').classList.remove('show');
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.json')) loadFile(file);
+});
+
+function loadFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    jsonTextarea.value = e.target.result;
+    parseAndSync();
+    showToast('File loaded: ' + file.name);
+  };
+  reader.readAsText(file);
+}
+
+function parseAndSync(fromEditor = false) {
+  const val = jsonTextarea.value.trim();
+  try {
+    const parsed = JSON.parse(val);
+    if (!Array.isArray(parsed)) throw new Error('Root element must be a JSON array [ ... ]');
+    validateStructure(parsed);
+    questions = parsed;
+    hideError();
+    renderList();
+    if (selectedIndex >= 0 && selectedIndex < questions.length) {
+      renderEditor(selectedIndex);
+      renderPreview();
+    } else if (selectedIndex >= questions.length) {
+      selectedIndex = -1;
+      clearEditor();
+    }
+  } catch(err) {
+    showError(err);
+  }
+}
+
+function validateStructure(arr) {
+  arr.forEach((q, i) => {
+    if (typeof q !== 'object') throw new Error(`Question ${i+1}: must be an object.`);
+    if (!('id' in q)) throw new Error(`Question ${i+1}: missing "id" field.`);
+    if (!('type' in q)) throw new Error(`Question ${i+1}: missing "type" field.`);
+    if (!['invertible','single','multiple','fill'].includes(q.type))
+      throw new Error(`Question ${i+1} (id: ${q.id}): unknown type "${q.type}". Use: invertible, single, multiple, fill.`);
+    if (q.type !== 'fill') {
+      if (!Array.isArray(q.options)) throw new Error(`Question ${i+1} (id: ${q.id}): "options" must be an array.`);
+      if (!Array.isArray(q.correct)) throw new Error(`Question ${i+1} (id: ${q.id}): "correct" must be an array.`);
+      if (q.options.length !== q.correct.length) throw new Error(`Question ${i+1} (id: ${q.id}): "options" and "correct" must have same length.`);
+    } else {
+      if (!('tofill' in q)) throw new Error(`Question ${i+1} (id: ${q.id}): fill type needs "tofill" field.`);
+    }
+  });
+}
+
+function showError(err) {
+  errorBanner.classList.add('show');
+  errorMsg.textContent = err.message;
+}
+function hideError() {
+  errorBanner.classList.remove('show');
+}
+
+// ===================== LIST =====================
+function renderList() {
+  const list = document.getElementById('q-list');
+  document.getElementById('q-count').textContent = questions.length;
+  list.innerHTML = '';
+  questions.forEach((q, i) => {
+    const el = document.createElement('div');
+    el.className = 'q-item' + (i === selectedIndex ? ' active' : '');
+    const tagsHtml = (q.tags || []).map(t => `<span class="tag accent">${t}</span>`).join('');
+    el.innerHTML = `
+      <div class="q-item-id">#${q.id || '???'}</div>
+      <div class="q-item-type">${q.type || '?'}</div>
+      <div class="q-item-tags">${tagsHtml}</div>
+    `;
+    el.addEventListener('click', () => selectQuestion(i));
+    list.appendChild(el);
+  });
+}
+
+function selectQuestion(i) {
+  selectedIndex = i;
+  renderList();
+  renderEditor(i);
+  renderPreview();
+  document.getElementById('tab-preview').classList.contains('active') || null;
+}
+
+// ===================== EDITOR =====================
+function renderEditor(i) {
+  const q = questions[i];
+  const area = document.getElementById('editor-area');
+  document.getElementById('editing-id').textContent = q.id ? `#${q.id}` : '';
+
+  let html = `
+    <div class="section-divider">Identity</div>
+    <div class="row2">
+      <div class="field-group">
+        <label>ID</label>
+        <input type="text" id="f-id" value="${esc(q.id||'')}" oninput="updateField('id',this.value)">
+      </div>
+      <div class="field-group">
+        <label>Type</label>
+        <select id="f-type" onchange="updateType(this.value)">
+          <option value="invertible" ${q.type==='invertible'?'selected':''}>invertible</option>
+          <option value="single" ${q.type==='single'?'selected':''}>single</option>
+          <option value="multiple" ${q.type==='multiple'?'selected':''}>multiple</option>
+          <option value="fill" ${q.type==='fill'?'selected':''}>fill</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field-group">
+        <label>Weight</label>
+        <input type="number" id="f-weight" value="${q.weight||1}" min="0" step="0.5" oninput="updateField('weight',parseFloat(this.value)||1)">
+      </div>
+      <div class="field-group">
+        <label>Author</label>
+        <input type="text" id="f-author" value="${esc(q.author||'')}" oninput="updateField('author',this.value)">
+      </div>
+    </div>
+
+    <div class="section-divider">Tags</div>
+    <div class="field-group">
+      <div class="tags-input-wrap" id="tags-wrap">
+        ${(q.tags||[]).map((t,ti) => `<span class="tag-chip">${esc(t)}<button class="tag-chip-x" onclick="removeTag(${ti})">×</button></span>`).join('')}
+        <input class="tags-input" id="tag-input" placeholder="Add tag…" onkeydown="handleTagInput(event)">
+      </div>
+    </div>
+
+    <div class="section-divider">Text</div>
+  `;
+
+  if (q.type === 'invertible') {
+    const texts = Array.isArray(q.text) ? q.text : [q.text||'', ''];
+    html += `<div id="text-rows">`;
+    texts.forEach((t, ti) => {
+      html += `
+        <div class="text-row">
+          <span class="text-row-label">${ti===0?'▲':'▼'}</span>
+          <textarea oninput="updateTextItem(${ti},this.value)">${esc(t)}</textarea>
+          ${texts.length > 1 ? `<button class="opt-remove" onclick="removeTextItem(${ti})">×</button>` : ''}
+        </div>`;
+    });
+    html += `</div>
+      <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;margin-top:4px" onclick="addTextItem()">＋ Add Text Variant</button>`;
+  } else if (q.type === 'fill') {
+    html += `
+      <div class="field-group">
+        <label>Intro text</label>
+        <textarea oninput="updateField('text',this.value)">${esc(q.text||'')}</textarea>
+      </div>
+      <div class="field-group">
+        <label>Fill text (use {{0}}, {{1}}, … for blanks)</label>
+        <textarea id="f-tofill" rows="4" oninput="updateFillText(this.value)">${esc(q.tofill||'')}</textarea>
+      </div>
+    `;
+  } else {
+    const t = Array.isArray(q.text) ? q.text[0] : (q.text||'');
+    html += `
+      <div class="field-group">
+        <textarea oninput="updateField('text',this.value)">${esc(t)}</textarea>
+      </div>`;
+  }
+
+  if (q.type !== 'fill') {
+    html += `<div class="section-divider" style="margin-top:16px">Options <small style="font-weight:400;color:var(--muted);font-size:9px">(click ✓ to toggle correct)</small></div>`;
+    html += `<div id="options-rows">`;
+    (q.options||[]).forEach((opt, oi) => {
+      const isCorrect = q.correct && q.correct[oi] === 1;
+      html += `
+        <div class="option-row" id="opt-row-${oi}">
+          <button class="correct-toggle ${isCorrect?'correct':''}" onclick="toggleCorrect(${oi})" title="Toggle correct">${isCorrect?'✓':'○'}</button>
+          <input type="text" value="${esc(opt)}" oninput="updateOption(${oi},this.value)" placeholder="Option text…">
+          <button class="opt-remove" onclick="removeOption(${oi})">×</button>
+        </div>`;
+    });
+    html += `</div>
+      <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;margin-top:6px" onclick="addOption()">＋ Add Option</button>`;
+  } else {
+    // Fill blanks answers
+    const fillCount = (q.tofill||'').match(/\{\{\d+\}\}/g);
+    const count = fillCount ? Math.max(...fillCount.map(m=>parseInt(m.replace(/[{}]/g,'')))) + 1 : (q.correct||[]).length;
+    html += `<div class="section-divider" style="margin-top:16px">Correct Answers</div><div id="fill-answers">`;
+    for (let fi = 0; fi < Math.max(count, (q.correct||[]).length); fi++) {
+      html += `
+        <div class="fill-row">
+          <span class="fill-idx">{{${fi}}}</span>
+          <input type="text" value="${esc((q.correct||[])[fi]||'')}" oninput="updateFillAnswer(${fi},this.value)" placeholder="Answer…">
+        </div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Delete button
+  html += `<div style="margin-top:24px;padding-top:14px;border-top:1px solid var(--border)">
+    <button class="btn btn-danger" onclick="deleteQuestion(${i})">🗑 Delete Question</button>
+  </div>`;
+
+  area.innerHTML = html;
+}
+
+function clearEditor() {
+  document.getElementById('editor-area').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">✏️</div>
+      <div style="font-family:var(--mono);font-size:12px;">Select a question to edit</div>
+    </div>`;
+  document.getElementById('editing-id').textContent = '';
+}
+
+// ===================== FIELD UPDATES =====================
+function updateField(key, value) {
+  if (selectedIndex < 0) return;
+  questions[selectedIndex][key] = value;
+  syncToJSON();
+  if (key === 'id') { renderList(); document.getElementById('editing-id').textContent = value ? `#${value}` : ''; }
+  renderPreview();
+}
+
+function updateType(value) {
+  if (selectedIndex < 0) return;
+  const q = questions[selectedIndex];
+  q.type = value;
+  if (value === 'fill') {
+    if (!q.tofill) q.tofill = '';
+    if (!Array.isArray(q.correct)) q.correct = [];
+    delete q.options;
+  } else {
+    if (!Array.isArray(q.options)) q.options = [];
+    if (!Array.isArray(q.correct)) q.correct = [];
+    delete q.tofill;
+    if (Array.isArray(q.text)) {
+      if (value !== 'invertible') q.text = q.text[0] || '';
+    } else {
+      if (value === 'invertible') q.text = [q.text || '', ''];
+    }
+  }
+  syncToJSON();
+  renderEditor(selectedIndex);
+  renderList();
+  renderPreview();
+}
+
+function updateTextItem(i, val) {
+  if (selectedIndex < 0) return;
+  if (!Array.isArray(questions[selectedIndex].text)) questions[selectedIndex].text = [questions[selectedIndex].text||'',''];
+  questions[selectedIndex].text[i] = val;
+  syncToJSON(); renderPreview();
+}
+function addTextItem() {
+  if (selectedIndex < 0) return;
+  if (!Array.isArray(questions[selectedIndex].text)) questions[selectedIndex].text = [questions[selectedIndex].text||''];
+  questions[selectedIndex].text.push('');
+  syncToJSON(); renderEditor(selectedIndex); renderPreview();
+}
+function removeTextItem(i) {
+  if (selectedIndex < 0) return;
+  questions[selectedIndex].text.splice(i, 1);
+  syncToJSON(); renderEditor(selectedIndex); renderPreview();
+}
+
+function updateOption(i, val) {
+  if (selectedIndex < 0) return;
+  questions[selectedIndex].options[i] = val;
+  syncToJSON(); renderPreview();
+}
+function toggleCorrect(i) {
+  if (selectedIndex < 0) return;
+  questions[selectedIndex].correct[i] = questions[selectedIndex].correct[i] === 1 ? 0 : 1;
+  const btn = document.getElementById(`opt-row-${i}`)?.querySelector('.correct-toggle');
+  if (btn) {
+    const isNow = questions[selectedIndex].correct[i] === 1;
+    btn.className = `correct-toggle ${isNow?'correct':''}`;
+    btn.textContent = isNow ? '✓' : '○';
+  }
+  syncToJSON(); renderPreview();
+}
+function addOption() {
+  if (selectedIndex < 0) return;
+  if (!Array.isArray(questions[selectedIndex].options)) questions[selectedIndex].options = [];
+  if (!Array.isArray(questions[selectedIndex].correct)) questions[selectedIndex].correct = [];
+  questions[selectedIndex].options.push('');
+  questions[selectedIndex].correct.push(0);
+  syncToJSON(); renderEditor(selectedIndex); renderPreview();
+}
+function removeOption(i) {
+  if (selectedIndex < 0) return;
+  questions[selectedIndex].options.splice(i, 1);
+  questions[selectedIndex].correct.splice(i, 1);
+  syncToJSON(); renderEditor(selectedIndex); renderPreview();
+}
+
+function updateFillText(val) {
+  if (selectedIndex < 0) return;
+  questions[selectedIndex].tofill = val;
+  // Sync correct array size
+  const matches = val.match(/\{\{\d+\}\}/g) || [];
+  const maxIdx = matches.length ? Math.max(...matches.map(m=>parseInt(m.replace(/[{}]/g,'')))) + 1 : 0;
+  const cur = questions[selectedIndex].correct || [];
+  while (cur.length < maxIdx) cur.push('');
+  questions[selectedIndex].correct = cur.slice(0, maxIdx);
+  syncToJSON(); renderPreview();
+}
+function updateFillAnswer(i, val) {
+  if (selectedIndex < 0) return;
+  if (!Array.isArray(questions[selectedIndex].correct)) questions[selectedIndex].correct = [];
+  questions[selectedIndex].correct[i] = val;
+  syncToJSON(); renderPreview();
+}
+
+// Tags
+function handleTagInput(e) {
+  const input = document.getElementById('tag-input');
+  if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+    e.preventDefault();
+    const tag = input.value.trim().replace(/,/g,'');
+    if (!questions[selectedIndex].tags) questions[selectedIndex].tags = [];
+    questions[selectedIndex].tags.push(tag);
+    input.value = '';
+    syncToJSON(); renderEditor(selectedIndex); renderPreview(); renderList();
+  } else if (e.key === 'Backspace' && !input.value && questions[selectedIndex].tags?.length) {
+    removeTag(questions[selectedIndex].tags.length - 1);
+  }
+}
+function removeTag(i) {
+  if (selectedIndex < 0) return;
+  questions[selectedIndex].tags.splice(i, 1);
+  syncToJSON(); renderEditor(selectedIndex); renderPreview(); renderList();
+}
+
+// ===================== ADD / DELETE =====================
+function addQuestion() {
+  const newQ = {
+    id: String(questions.length + 1).padStart(3, '0'),
+    type: 'single',
+    text: 'New question',
+    options: ['Option A', 'Option B'],
+    correct: [1, 0],
+    weight: 1,
+    tags: []
+  };
+  questions.push(newQ);
+  syncToJSON();
+  renderList();
+  selectQuestion(questions.length - 1);
+  showToast('New question added');
+}
+
+function deleteQuestion(i) {
+  if (!confirm(`Delete question #${questions[i].id}?`)) return;
+  questions.splice(i, 1);
+  selectedIndex = -1;
+  syncToJSON(); renderList(); clearEditor();
+  document.getElementById('preview-area').innerHTML = `<div class="no-preview"><div style="font-size:32px;opacity:0.3">👁</div><div style="font-family:var(--mono);font-size:12px;">Select a question to preview</div></div>`;
+  showToast('Question deleted');
+}
+
+// ===================== JSON SYNC =====================
+function syncToJSON() {
+  suppressJsonSync = true;
+  jsonTextarea.value = JSON.stringify(questions, null, 4);
+  suppressJsonSync = false;
+  hideError();
+}
+
+// ===================== DOWNLOAD =====================
+function downloadJSON() {
+  const blob = new Blob([JSON.stringify(questions, null, 4)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'questions.json';
+  a.click();
+  showToast('JSON downloaded!');
+}
+
+// ===================== PREVIEW =====================
+function switchTab(tab) {
+  document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  if (tab === 'preview') renderPreview();
+}
+
+function toggleSolved() {
+  showSolved = !showSolved;
+  const track = document.getElementById('toggle-track');
+  if (showSolved) track.classList.add('on'); else track.classList.remove('on');
+  renderPreview();
+}
+
+function renderPreview() {
+  if (selectedIndex < 0 || selectedIndex >= questions.length) return;
+  const q = questions[selectedIndex];
+  const area = document.getElementById('preview-area');
+  let html = `<div class="preview-card">`;
+  html += `<div class="preview-q-id">#${esc(q.id||'?')} <span class="preview-type-badge">${q.type}</span></div>`;
+
+  // Text
+  let displayText = '';
+  if (Array.isArray(q.text)) displayText = q.text[0] || '';
+  else displayText = q.text || '';
+  html += `<div class="preview-text">${displayText}</div>`;
+
+  if (q.type === 'fill') {
+    let fill = q.tofill || '';
+    if (showSolved) {
+      (q.correct || []).forEach((ans, i) => {
+        fill = fill.replace(`{{${i}}}`, `<span class="fill-blank solved">${esc(ans)}</span>`);
+      });
+    } else {
+      fill = fill.replace(/\{\{(\d+)\}\}/g, (m, n) => `<span class="fill-blank">____</span>`);
+    }
+    html += `<div class="preview-fill-text">${fill}</div>`;
+  } else {
+    html += `<ul class="preview-options">`;
+    (q.options || []).forEach((opt, oi) => {
+      const isCorrect = q.correct && q.correct[oi] === 1;
+      let cls = '';
+      let indCls = '';
+      let indIcon = '○';
+      if (showSolved) {
+        cls = isCorrect ? 'correct-opt' : 'wrong-opt';
+        indCls = isCorrect ? 'correct-ind' : 'wrong-ind';
+        indIcon = isCorrect ? '✓' : '✗';
+      }
+      html += `<li class="preview-option ${cls}">
+        <div class="opt-indicator ${indCls}">${indIcon}</div>
+        <span>${opt}</span>
+      </li>`;
+    });
+    html += `</ul>`;
+  }
+  html += `</div>`;
+  area.innerHTML = html;
+}
+
+// ===================== UTILS =====================
+function esc(str) {
+  if (str == null) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
